@@ -1,34 +1,62 @@
-import { createContext, useCallback, useContext, useEffect, useState } from "react";
-import { listStudents, verifyCode as verifyCodeRequest } from "../api/portal";
 import {
-  clearActiveStudentId,
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import { listPortalStudents } from "../api/portal";
+import {
+  clearPortalSession,
   getActiveStudentId,
+  getPortalPhone,
+  hasPortalSession,
   setActiveStudentId as persistActiveStudentId,
-} from "../utils/activeStudent";
-import { clearTokens, getAccessToken, setTokens } from "../utils/tokenStorage";
+  setPortalPhone,
+  setPortalTokens,
+} from "../utils/portalTokenStorage";
 
 const PortalAuthContext = createContext(null);
 
 export function PortalAuthProvider({ children }) {
+  const [authenticated, setAuthenticated] = useState(() => hasPortalSession());
   const [students, setStudents] = useState([]);
-  const [activeStudentId, setActiveStudentIdState] = useState(getActiveStudentId());
-  const [loading, setLoading] = useState(true);
-  const [authenticated, setAuthenticated] = useState(Boolean(getAccessToken()));
+  const [activeStudentId, setActiveStudentIdState] = useState(() => getActiveStudentId());
+  const [phone, setPhoneState] = useState(() => getPortalPhone());
+  const [loading, setLoading] = useState(() => hasPortalSession());
+  const [error, setError] = useState(false);
 
   const loadStudents = useCallback(async () => {
-    if (!getAccessToken()) {
+    if (!hasPortalSession()) {
+      setAuthenticated(false);
+      setStudents([]);
       setLoading(false);
       return;
     }
+    setLoading(true);
+    setError(false);
     try {
-      const data = await listStudents();
-      setStudents(data);
+      const list = await listPortalStudents();
+      const saved = getActiveStudentId();
+      // A stored id that is no longer in the list (child deactivated, other
+      // parent's device) falls back to the first child.
+      const next = list.some((student) => String(student.id) === saved)
+        ? saved
+        : list[0]
+          ? String(list[0].id)
+          : null;
+      setStudents(list);
+      setActiveStudentIdState(next);
+      persistActiveStudentId(next);
       setAuthenticated(true);
-    } catch {
-      clearTokens();
-      clearActiveStudentId();
-      setAuthenticated(false);
-      setStudents([]);
+    } catch (requestError) {
+      if (requestError?.response?.status === 401) {
+        clearPortalSession();
+        setAuthenticated(false);
+        setStudents([]);
+      } else {
+        setError(true);
+      }
     } finally {
       setLoading(false);
     }
@@ -38,44 +66,50 @@ export function PortalAuthProvider({ children }) {
     loadStudents();
   }, [loadStudents]);
 
-  const login = useCallback(
-    async (phone, code) => {
-      const tokens = await verifyCodeRequest(phone, code);
-      setTokens(tokens);
-      setAuthenticated(true);
-      await loadStudents();
-    },
-    [loadStudents],
-  );
+  const login = useCallback(async (tokens, loginPhone) => {
+    setPortalTokens(tokens);
+    setPortalPhone(loginPhone);
+    setPhoneState(loginPhone);
+    setAuthenticated(true);
+    await loadStudents();
+  }, [loadStudents]);
 
+  const selectStudent = useCallback((studentId) => {
+    const next = studentId ? String(studentId) : null;
+    setActiveStudentIdState(next);
+    persistActiveStudentId(next);
+  }, []);
+
+  // Clears the portal keys only.
   const logout = useCallback(() => {
-    clearTokens();
-    clearActiveStudentId();
+    clearPortalSession();
     setAuthenticated(false);
     setStudents([]);
     setActiveStudentIdState(null);
+    setPhoneState(null);
+    setLoading(false);
   }, []);
 
-  const selectStudent = useCallback((id) => {
-    persistActiveStudentId(id);
-    setActiveStudentIdState(id);
-  }, []);
-
-  const activeStudent = students.find((s) => s.id === activeStudentId) || null;
+  const activeStudent =
+    students.find((student) => String(student.id) === activeStudentId) ?? null;
 
   const value = {
+    isAuthenticated: authenticated,
     students,
-    loading,
-    authenticated,
     activeStudentId,
     activeStudent,
+    selectStudent,
+    phone,
+    loading,
+    error,
+    reloadStudents: loadStudents,
     login,
     logout,
-    selectStudent,
-    refreshStudents: loadStudents,
   };
 
-  return <PortalAuthContext.Provider value={value}>{children}</PortalAuthContext.Provider>;
+  return (
+    <PortalAuthContext.Provider value={value}>{children}</PortalAuthContext.Provider>
+  );
 }
 
 export function usePortalAuth() {

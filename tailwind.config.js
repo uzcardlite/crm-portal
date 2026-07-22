@@ -24,6 +24,17 @@ export default {
           DEFAULT: "#A32D2D",
           bg: "#FCEBEB",
         },
+        // Per-group lesson hues (LessonCard's colored rail) — same palette as
+        // crm-frontend's Schedule/portal so a group keeps its hue everywhere.
+        scheduleBlock: {
+          teal: { bg: "#CCFBF1", text: "#0F766E", border: "#5EEAD4" },
+          blue: { bg: "#DBEAFE", text: "#1D4ED8", border: "#93C5FD" },
+          violet: { bg: "#EDE9FE", text: "#6D28D9", border: "#C4B5FD" },
+          rose: { bg: "#FFE4E6", text: "#BE123C", border: "#FDA4AF" },
+          amber: { bg: "#FEF3C7", text: "#92400E", border: "#FCD34D" },
+          green: { bg: "#DCFCE7", text: "#15803D", border: "#86EFAC" },
+          pink: { bg: "#FCE7F3", text: "#BE185D", border: "#F9A8D4" },
+        },
       },
       borderRadius: {
         card: "12px",

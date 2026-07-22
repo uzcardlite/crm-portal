@@ -1,33 +1,52 @@
-import apiClient from "./client";
+import portalClient from "./portalClient";
 
-export function requestCode(phone) {
-  return apiClient.post("/api/v1/portal/auth/request-code", { phone }).then((res) => res.data);
+// --- auth ------------------------------------------------------------------
+
+export function requestPortalCode(phone) {
+  return portalClient
+    .post("/api/v1/portal/auth/request-code", { phone })
+    .then((res) => res.data);
 }
 
-export function verifyCode(phone, code) {
-  return apiClient
+export function verifyPortalCode(phone, code) {
+  return portalClient
     .post("/api/v1/portal/auth/verify-code", { phone, code })
     .then((res) => res.data);
 }
 
-export function listStudents() {
-  return apiClient.get("/api/v1/portal/students").then((res) => res.data);
+// --- data ------------------------------------------------------------------
+
+export function listPortalStudents() {
+  return portalClient.get("/api/v1/portal/students").then((res) => res.data);
 }
 
-export function getStudentSummary(studentId) {
-  return apiClient.get(`/api/v1/portal/students/${studentId}/summary`).then((res) => res.data);
+export function getPortalSummary(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/summary`)
+    .then((res) => res.data);
 }
 
-export function getStudentAttendance(studentId, year, month) {
-  return apiClient
+// `year` and `month` are required by the backend — omitting them returns 422.
+export function getPortalAttendance(studentId, year, month) {
+  return portalClient
     .get(`/api/v1/portal/students/${studentId}/attendance`, { params: { year, month } })
     .then((res) => res.data);
 }
 
-export function getStudentPayments(studentId) {
-  return apiClient.get(`/api/v1/portal/students/${studentId}/payments`).then((res) => res.data);
+export function getPortalPayments(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/payments`)
+    .then((res) => res.data);
 }
 
-export function getStudentGrades(studentId) {
-  return apiClient.get(`/api/v1/portal/students/${studentId}/grades`).then((res) => res.data);
+export function getPortalGrades(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/grades`)
+    .then((res) => res.data);
+}
+
+export function getPortalSchedule(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/schedule`)
+    .then((res) => res.data);
 }

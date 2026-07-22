@@ -1,15 +1,56 @@
-export default function EmptyState({ icon: Icon, title, description }) {
+import Button from "./Button";
+import { cn } from "../../utils/cn";
+
+// size="md" (default) — page-level empty state.
+// size="sm"           — compact, for an empty table body or a card slot.
+const SIZE_STYLES = {
+  sm: { wrapper: "gap-2 px-4 py-6", icon: "h-9 w-9", iconSize: 18, title: "text-sm" },
+  md: { wrapper: "gap-3 px-6 py-12", icon: "h-12 w-12", iconSize: 22, title: "text-sm" },
+};
+
+export default function EmptyState({
+  icon: Icon,
+  title,
+  description,
+  actionLabel,
+  onAction,
+  action,
+  size = "md",
+  className,
+  children,
+}) {
+  const styles = SIZE_STYLES[size] ?? SIZE_STYLES.md;
+
   return (
-    <div className="flex flex-col items-center justify-center gap-3 rounded-card border border-dashed border-gray-200 bg-white px-6 py-12 text-center">
+    <div
+      className={cn(
+        "flex flex-col items-center justify-center rounded-card border border-dashed border-gray-200 bg-white text-center",
+        styles.wrapper,
+        className,
+      )}
+    >
       {Icon && (
-        <span className="flex h-12 w-12 items-center justify-center rounded-full bg-accent-light/30 text-accent-dark">
-          <Icon size={22} />
+        <span
+          className={cn(
+            "flex items-center justify-center rounded-full bg-accent-light/30 text-accent-dark",
+            styles.icon,
+          )}
+        >
+          <Icon size={styles.iconSize} />
         </span>
       )}
       <div>
-        <h3 className="text-sm font-semibold text-gray-900">{title}</h3>
+        <h3 className={cn("font-semibold text-gray-900", styles.title)}>{title}</h3>
         {description && <p className="mt-1 text-sm text-gray-500">{description}</p>}
       </div>
+      {/* Legacy shorthand first, then the free-form slots. */}
+      {actionLabel && (
+        <Button size="sm" onClick={onAction}>
+          {actionLabel}
+        </Button>
+      )}
+      {action}
+      {children}
     </div>
   );
 }

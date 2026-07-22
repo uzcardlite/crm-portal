@@ -1,17 +1,17 @@
 import axios from "axios";
 import {
-  clearTokens,
-  getAccessToken,
-  getRefreshToken,
-  setTokens,
-} from "../utils/tokenStorage";
+  clearPortalSession,
+  getPortalAccessToken,
+  getPortalRefreshToken,
+  setPortalTokens,
+} from "../utils/portalTokenStorage";
 
 const baseURL = import.meta.env.VITE_API_URL;
 
-const apiClient = axios.create({ baseURL });
+const portalClient = axios.create({ baseURL });
 
-apiClient.interceptors.request.use((config) => {
-  const token = getAccessToken();
+portalClient.interceptors.request.use((config) => {
+  const token = getPortalAccessToken();
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -20,22 +20,22 @@ apiClient.interceptors.request.use((config) => {
 
 let refreshPromise = null;
 
-function redirectToLogin() {
-  clearTokens();
+function redirectToPortalLogin() {
+  clearPortalSession();
   if (window.location.pathname !== "/login") {
     window.location.href = "/login";
   }
 }
 
-apiClient.interceptors.response.use(
+portalClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
     const status = error.response?.status;
-    const isAuthEndpoint =
-      originalRequest?.url?.includes("/portal/auth/request-code") ||
-      originalRequest?.url?.includes("/portal/auth/verify-code") ||
-      originalRequest?.url?.includes("/portal/auth/refresh");
+    // Every /portal/auth/* call (request-code, verify-code, refresh) is excluded:
+    // a 401 there is a real answer, not an expired session, and retrying it
+    // would start a refresh loop.
+    const isAuthEndpoint = originalRequest?.url?.includes("/portal/auth/");
 
     if (status !== 401 || !originalRequest || originalRequest._retry || isAuthEndpoint) {
       return Promise.reject(error);
@@ -43,18 +43,19 @@ apiClient.interceptors.response.use(
 
     originalRequest._retry = true;
 
-    const refreshToken = getRefreshToken();
+    const refreshToken = getPortalRefreshToken();
     if (!refreshToken) {
-      redirectToLogin();
+      redirectToPortalLogin();
       return Promise.reject(error);
     }
 
     try {
+      // Two parallel 401s share a single refresh call.
       if (!refreshPromise) {
         refreshPromise = axios
           .post(`${baseURL}/api/v1/portal/auth/refresh`, { refresh_token: refreshToken })
           .then((res) => {
-            setTokens(res.data);
+            setPortalTokens(res.data);
             return res.data.access_token;
           })
           .finally(() => {
@@ -64,12 +65,12 @@ apiClient.interceptors.response.use(
 
       const newAccessToken = await refreshPromise;
       originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-      return apiClient(originalRequest);
+      return portalClient(originalRequest);
     } catch (refreshError) {
-      redirectToLogin();
+      redirectToPortalLogin();
       return Promise.reject(refreshError);
     }
   },
 );
 
-export default apiClient;
+export default portalClient;

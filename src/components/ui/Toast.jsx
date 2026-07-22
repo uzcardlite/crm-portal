@@ -1,22 +1,25 @@
 import { Toaster } from "react-hot-toast";
+import tailwindConfig from "../../../tailwind.config.js";
+
+const colors = tailwindConfig.theme.extend.colors;
 
 export default function Toast() {
   return (
     <Toaster
-      position="top-center"
+      position="top-right"
       toastOptions={{
         duration: 4000,
         style: {
           borderRadius: "8px",
-          background: "#12182B",
-          color: "#C7C9D6",
+          background: colors.sidebar.DEFAULT,
+          color: colors.sidebar.text,
           fontSize: "14px",
         },
         success: {
-          iconTheme: { primary: "#0F6E56", secondary: "#E1F5EE" },
+          iconTheme: { primary: colors.success.DEFAULT, secondary: colors.success.bg },
         },
         error: {
-          iconTheme: { primary: "#A32D2D", secondary: "#FCEBEB" },
+          iconTheme: { primary: colors.danger.DEFAULT, secondary: colors.danger.bg },
         },
       }}
     />
