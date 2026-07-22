@@ -27,9 +27,19 @@ function formatCountdown(seconds) {
 }
 
 export default function PortalLogin() {
-  const { isAuthenticated, login } = usePortalAuth();
+  const { isAuthenticated, loading, login, telegramAuthError, clearTelegramAuthError } =
+    usePortalAuth();
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Surfaces the reason a Telegram Mini App auto-login could not sign the
+  // parent in (e.g. not registered yet) once the fallback form appears.
+  useEffect(() => {
+    if (telegramAuthError) {
+      toast.error(telegramAuthError);
+      clearTelegramAuthError();
+    }
+  }, [telegramAuthError, clearTelegramAuthError]);
 
   const [step, setStep] = useState("phone");
   const [phone, setPhone] = useState(PHONE_PREFIX);
@@ -126,6 +136,16 @@ export default function PortalLogin() {
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
+  }
+
+  // While a Mini App auto-login attempt is in flight, hide the form so the
+  // parent never sees it flash before landing on the dashboard.
+  if (loading) {
+    return (
+      <div className="flex min-h-dvh items-center justify-center bg-background">
+        <Spinner size={32} />
+      </div>
+    );
   }
 
   return (

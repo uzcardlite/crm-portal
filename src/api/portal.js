@@ -14,6 +14,14 @@ export function verifyPortalCode(phone, code) {
     .then((res) => res.data);
 }
 
+// Auto-login when the portal is opened as a Telegram Mini App. Returns the
+// same { access_token, refresh_token } shape as verify-code.
+export function loginWithTelegramInitData(initData) {
+  return portalClient
+    .post("/api/v1/portal/auth/telegram", { init_data: initData })
+    .then((res) => res.data);
+}
+
 // --- data ------------------------------------------------------------------
 
 export function listPortalStudents() {

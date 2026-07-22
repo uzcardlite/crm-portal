@@ -5,7 +5,7 @@ import {
   useEffect,
   useState,
 } from "react";
-import { listPortalStudents } from "../api/portal";
+import { listPortalStudents, loginWithTelegramInitData } from "../api/portal";
 import {
   clearPortalSession,
   getActiveStudentId,
@@ -15,6 +15,7 @@ import {
   setPortalPhone,
   setPortalTokens,
 } from "../utils/portalTokenStorage";
+import { getTelegramInitData, isTelegramMiniApp, setupTelegramWebApp } from "../utils/telegram";
 
 const PortalAuthContext = createContext(null);
 
@@ -23,8 +24,15 @@ export function PortalAuthProvider({ children }) {
   const [students, setStudents] = useState([]);
   const [activeStudentId, setActiveStudentIdState] = useState(() => getActiveStudentId());
   const [phone, setPhoneState] = useState(() => getPortalPhone());
-  const [loading, setLoading] = useState(() => hasPortalSession());
+  // Also true (not just when a session already exists) so a Mini App
+  // auto-login attempt can run before the login form ever gets a chance to
+  // flash on screen.
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
+  // Message from a failed Telegram auto-login (e.g. "not registered yet"),
+  // read and cleared once by the login screen.
+  const [telegramAuthError, setTelegramAuthError] = useState(null);
+  const clearTelegramAuthError = useCallback(() => setTelegramAuthError(null), []);
 
   const loadStudents = useCallback(async () => {
     if (!hasPortalSession()) {
@@ -62,9 +70,39 @@ export function PortalAuthProvider({ children }) {
     }
   }, []);
 
-  useEffect(() => {
-    loadStudents();
+  // Attempts a silent Telegram Mini App login before falling back to the
+  // regular phone + code flow. Runs once on mount.
+  const attemptTelegramAutoLogin = useCallback(async () => {
+    try {
+      const tokens = await loginWithTelegramInitData(getTelegramInitData());
+      setPortalTokens(tokens);
+      setAuthenticated(true);
+      await loadStudents();
+    } catch (requestError) {
+      const status = requestError?.response?.status;
+      const detail = requestError?.response?.data?.detail;
+      if ((status === 404 || status === 401) && typeof detail === "string") {
+        setTelegramAuthError(detail);
+      }
+      setAuthenticated(false);
+      setLoading(false);
+    }
   }, [loadStudents]);
+
+  useEffect(() => {
+    setupTelegramWebApp();
+
+    if (hasPortalSession()) {
+      loadStudents();
+    } else if (isTelegramMiniApp()) {
+      setLoading(true);
+      attemptTelegramAutoLogin();
+    } else {
+      setLoading(false);
+    }
+    // Runs once on mount — the Mini App state does not change during a session.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const login = useCallback(async (tokens, loginPhone) => {
     setPortalTokens(tokens);
@@ -102,6 +140,8 @@ export function PortalAuthProvider({ children }) {
     phone,
     loading,
     error,
+    telegramAuthError,
+    clearTelegramAuthError,
     reloadStudents: loadStudents,
     login,
     logout,
