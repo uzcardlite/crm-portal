@@ -6,7 +6,10 @@ import {
   setPortalTokens,
 } from "../utils/portalTokenStorage";
 
-const baseURL = import.meta.env.VITE_API_URL;
+// Falls back to the production backend when the env var is missing so a
+// misconfigured build (e.g. the Android APK's CI build) can never silently
+// point at an empty baseURL. Mirrors crm-landing's config default.
+const baseURL = import.meta.env.VITE_API_URL || "https://crm-backend-production-49b2.up.railway.app";
 
 const portalClient = axios.create({ baseURL });
 

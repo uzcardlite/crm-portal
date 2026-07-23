@@ -1,0 +1,8 @@
+{
+  "appId": "uz.ncrm.farzandim",
+  "appName": "Farzandim",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}

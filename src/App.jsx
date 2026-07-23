@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import { PortalAuthProvider } from "./context/PortalAuthContext";
 import PortalProtectedRoute from "./components/portal/PortalProtectedRoute";
@@ -10,8 +11,15 @@ import PortalGrades from "./pages/PortalGrades";
 import PortalPayments from "./pages/PortalPayments";
 import PortalSchedule from "./pages/PortalSchedule";
 import PortalProfile from "./pages/PortalProfile";
+import { useNativeBackButton } from "./hooks/useNativeBackButton";
+import { setupNativeStatusBar } from "./utils/nativeStatusBar";
 
 export default function App() {
+  useNativeBackButton();
+  useEffect(() => {
+    setupNativeStatusBar();
+  }, []);
+
   return (
     <PortalAuthProvider>
       <BrowserRouter>

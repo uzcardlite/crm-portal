@@ -6,4 +6,7 @@ body {
   margin: 0;
   @apply bg-background text-gray-900 antialiased;
   font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+  /* Keeps content clear of the Android status bar in the APK build (edge-to-edge
+     WebView); a no-op everywhere else since env() resolves to 0 without a notch. */
+  padding-top: env(safe-area-inset-top);
 }
