@@ -1,0 +1,6 @@
+# The Gradle wrapper and any shell script must stay LF, or the CI runner
+# (Linux) fails with "bad interpreter: /bin/sh^M". This holds regardless of a
+# contributor's core.autocrlf setting on Windows.
+gradlew text eol=lf
+*.sh text eol=lf
+*.bat text eol=crlf
