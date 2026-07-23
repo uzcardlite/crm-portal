@@ -16,7 +16,8 @@ jobs:
       - name: Set up Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          # Capacitor CLI 8.x requires Node >= 22; Node 20 fails `cap sync`.
+          node-version: 22
           cache: npm
 
       - name: Install dependencies
