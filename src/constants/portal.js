@@ -1,5 +1,12 @@
 // Portal (ota-ona/o'quvchi kabineti) konstantalari.
-import { Banknote, CalendarCheck, GraduationCap, Home, User } from "lucide-react";
+import {
+  Banknote,
+  CalendarCheck,
+  CalendarDays,
+  GraduationCap,
+  Home,
+  User,
+} from "lucide-react";
 
 // Backend weekday keys, Monday-first (matches crm-frontend's Groups/Schedule order).
 export const DAY_KEYS = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"];
@@ -44,6 +51,18 @@ export const PORTAL_TABS = [
   { to: "/", label: "Asosiy", icon: Home, end: true },
   { to: "/attendance", label: "Davomat", icon: CalendarCheck },
   { to: "/grades", label: "Baholar", icon: GraduationCap },
+  { to: "/payments", label: "To'lovlar", icon: Banknote },
+  { to: "/profile", label: "Profil", icon: User },
+];
+
+// Full navigation shown in the slide-in drawer menu. It repeats the bottom
+// tabs (so the drawer is a complete map of the app) and adds Dars jadvali,
+// which has no tab of its own — reachable only from the home page otherwise.
+export const PORTAL_MENU = [
+  { to: "/", label: "Asosiy", icon: Home, end: true },
+  { to: "/attendance", label: "Davomat", icon: CalendarCheck },
+  { to: "/grades", label: "Baholar", icon: GraduationCap },
+  { to: "/schedule", label: "Dars jadvali", icon: CalendarDays },
   { to: "/payments", label: "To'lovlar", icon: Banknote },
   { to: "/profile", label: "Profil", icon: User },
 ];

@@ -30,7 +30,7 @@ export default function PortalTabBar({ variant = "bottom" }) {
   }
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-gray-100 bg-white pb-[env(safe-area-inset-bottom)] md:hidden">
+    <nav className="fixed inset-x-0 bottom-0 z-30 border-t border-gray-100 bg-white/90 pb-[env(safe-area-inset-bottom)] shadow-[0_-2px_12px_-4px_rgb(16_24_40/0.1)] backdrop-blur-md md:hidden">
       <div className="mx-auto flex max-w-lg">
         {PORTAL_TABS.map((tab) => {
           const Icon = tab.icon;
@@ -45,13 +45,13 @@ export default function PortalTabBar({ variant = "bottom" }) {
                 <>
                   <span
                     className={cn(
-                      "flex h-7 w-14 items-center justify-center rounded-full",
+                      "flex h-8 w-16 items-center justify-center rounded-full transition-colors",
                       isActive
                         ? "bg-accent-light/40 text-accent-dark"
                         : "text-gray-400",
                     )}
                   >
-                    <Icon size={20} />
+                    <Icon size={20} strokeWidth={isActive ? 2.4 : 2} />
                   </span>
                   <span
                     className={cn(

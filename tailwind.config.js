@@ -37,14 +37,32 @@ export default {
         },
       },
       borderRadius: {
-        card: "12px",
-        btn: "8px",
+        // Softer, rounder surfaces — the "modern & soft" refresh.
+        card: "16px",
+        btn: "10px",
       },
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
       },
       boxShadow: {
-        card: "0 1px 2px 0 rgb(0 0 0 / 0.05)",
+        // Layered, low-opacity shadows read as soft depth, not a hard edge.
+        card: "0 1px 2px 0 rgb(16 24 40 / 0.04), 0 2px 8px -2px rgb(16 24 40 / 0.08)",
+        "card-hover": "0 8px 24px -4px rgb(16 24 40 / 0.12)",
+        drawer: "0 10px 40px -8px rgb(16 24 40 / 0.35)",
+      },
+      keyframes: {
+        "fade-in": {
+          from: { opacity: "0" },
+          to: { opacity: "1" },
+        },
+        "slide-in-right": {
+          from: { transform: "translateX(100%)" },
+          to: { transform: "translateX(0)" },
+        },
+      },
+      animation: {
+        "fade-in": "fade-in 0.2s ease-out",
+        "slide-in-right": "slide-in-right 0.25s cubic-bezier(0.32, 0.72, 0, 1)",
       },
     },
   },
