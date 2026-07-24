@@ -3,6 +3,8 @@
   "appName": "Farzandim",
   "webDir": "dist",
   "server": {
-    "androidScheme": "https"
+    "androidScheme": "https",
+    "url": "https://portal.ncrm.uz",
+    "cleartext": false
   }
 }
