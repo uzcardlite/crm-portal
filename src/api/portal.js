@@ -106,6 +106,27 @@ export function markPortalChatRead(threadId) {
     .then((res) => res.data);
 }
 
+// Teachers the parent can start a chat with for this child — the teachers of
+// the child's active groups. Each item: { teacher_id, teacher_name, group_id,
+// group_name }.
+export function getPortalChatTeachers(studentId) {
+  return portalClient
+    .get("/api/v1/portal/chat/teachers", { params: { student_id: studentId } })
+    .then((res) => res.data);
+}
+
+// Opens (or returns, idempotently) a thread between this child and a teacher.
+// Returns the same ChatThreadOut shape as the thread list, so callers can
+// navigate straight to `/chat/{id}`.
+export function createPortalChatThread(studentId, teacherId) {
+  return portalClient
+    .post("/api/v1/portal/chat/threads", {
+      student_id: studentId,
+      teacher_id: teacherId,
+    })
+    .then((res) => res.data);
+}
+
 // --- booking ---------------------------------------------------------------
 
 export function getPortalBookingSlots(studentId) {
