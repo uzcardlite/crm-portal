@@ -3,7 +3,6 @@ import {
   Banknote,
   CalendarClock,
   CalendarCheck,
-  CalendarDays,
   DoorOpen,
   GraduationCap,
   Home,
@@ -59,20 +58,14 @@ export const PORTAL_TABS = [
   { to: "/profile", label: "Profil", icon: User },
 ];
 
-// Full navigation shown in the slide-in drawer menu. It repeats the bottom
-// tabs (so the drawer is a complete map of the app) and adds Dars jadvali,
-// which has no tab of its own — reachable only from the home page otherwise.
-export const PORTAL_MENU = [
-  { to: "/", label: "Asosiy", icon: Home, end: true },
-  { to: "/attendance", label: "Davomat", icon: CalendarCheck },
-  { to: "/grades", label: "Baholar", icon: GraduationCap },
-  { to: "/schedule", label: "Dars jadvali", icon: CalendarDays },
-  { to: "/chat", label: "Chat", icon: MessageCircle },
+// Quick-access tiles on the home page for the sections that have no bottom
+// tab of their own (they used to live in the removed slide-in drawer). Chat is
+// also reachable from the corner chat button, but repeated here as a tile.
+export const PORTAL_QUICK_LINKS = [
   { to: "/menu", label: "Menyu", icon: UtensilsCrossed },
   { to: "/turnstile", label: "Kirish-chiqish", icon: DoorOpen },
   { to: "/booking", label: "Konsultatsiya", icon: CalendarClock },
-  { to: "/payments", label: "To'lovlar", icon: Banknote },
-  { to: "/profile", label: "Profil", icon: User },
+  { to: "/chat", label: "Chat", icon: MessageCircle },
 ];
 
 // Parent-facing booking status: label + Badge variant.

@@ -1,8 +1,10 @@
 import { useCallback, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Banknote, CalendarCheck, CalendarX, GraduationCap } from "lucide-react";
 import Badge from "../components/ui/Badge";
 import Card from "../components/ui/Card";
 import EmptyState from "../components/ui/EmptyState";
+import KoshinStar from "../components/ui/KoshinStar";
 import ProgressRing from "../components/ui/ProgressRing";
 import Skeleton from "../components/ui/Skeleton";
 import ChildSwitcher from "../components/portal/ChildSwitcher";
@@ -21,7 +23,7 @@ import {
 } from "../api/portal";
 import { usePortalAuth } from "../context/PortalAuthContext";
 import { usePortalResource } from "../hooks/usePortalResource";
-import { DAY_LABELS } from "../constants/portal";
+import { DAY_LABELS, PORTAL_QUICK_LINKS } from "../constants/portal";
 import { formatDate, formatMoney, formatMonth } from "../utils/format";
 import {
   dayKeyFromDate,
@@ -118,22 +120,31 @@ export default function PortalHome() {
 
   return (
     <>
-      <div className="flex items-start justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-semibold text-gray-900">Assalomu alaykum!</h1>
-          <p className="mt-1 truncate text-sm text-gray-500">
-            {activeStudent
-              ? `${activeStudent.full_name} · ${activeStudent.tenant_name}`
-              : ""}
-          </p>
+      {/* Greeting — a soft amber-washed block with a faint koshin-star
+          watermark in the corner (the national accent, kept very light). */}
+      <div className="relative overflow-hidden rounded-card border border-accent-light/40 bg-accent-light/10 px-4 py-4">
+        <KoshinStar
+          size={150}
+          strokeWidth={4}
+          className="pointer-events-none absolute -right-6 -top-8 text-accent/[0.06]"
+        />
+        <div className="relative flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <h1 className="text-2xl font-semibold text-accent-dark">Assalomu alaykum!</h1>
+            <p className="mt-1 truncate text-sm text-gray-500">
+              {activeStudent
+                ? `${activeStudent.full_name} · ${activeStudent.tenant_name}`
+                : ""}
+            </p>
+          </div>
+          {summary.loading ? (
+            <Skeleton className="h-6 w-24 rounded-full" />
+          ) : debt ? (
+            <Badge variant={debt.has_debt ? "danger" : "success"}>
+              {debt.has_debt ? formatMoney(debt.amount) : "TO'LANGAN"}
+            </Badge>
+          ) : null}
         </div>
-        {summary.loading ? (
-          <Skeleton className="h-6 w-24 rounded-full" />
-        ) : debt ? (
-          <Badge variant={debt.has_debt ? "danger" : "success"}>
-            {debt.has_debt ? formatMoney(debt.amount) : "TO'LANGAN"}
-          </Badge>
-        ) : null}
       </div>
 
       <ChildSwitcher
@@ -142,6 +153,28 @@ export default function PortalHome() {
       >
         {students}
       </ChildSwitcher>
+
+      {/* Quick-access tiles for the sections that have no bottom tab
+          (moved here from the removed slide-in drawer). */}
+      <div className="grid grid-cols-2 gap-3">
+        {PORTAL_QUICK_LINKS.map((link) => {
+          const Icon = link.icon;
+          return (
+            <Link
+              key={link.to}
+              to={link.to}
+              className="flex items-center gap-3 rounded-card border border-gray-100 bg-white p-4 shadow-card transition-shadow active:shadow-card-hover"
+            >
+              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-accent-light/30 text-accent-dark">
+                <Icon size={20} />
+              </span>
+              <span className="truncate text-sm font-medium text-gray-900">
+                {link.label}
+              </span>
+            </Link>
+          );
+        })}
+      </div>
 
       {/* Two headline numbers: attendance this month and the grade average. */}
       {summary.loading || grades.loading ? (

@@ -1,10 +1,11 @@
 import { NavLink } from "react-router-dom";
 import { PORTAL_TABS } from "../../constants/portal";
 import { cn } from "../../utils/cn";
+import PortalChatButton from "./PortalChatButton";
 
 // variant="bottom" — mobile tab bar; variant="top" — md+ header nav.
 // Touch-first on purpose: no hover styles in either variant.
-export default function PortalTabBar({ variant = "bottom" }) {
+export default function PortalTabBar({ variant = "bottom", unreadCount = 0 }) {
   if (variant === "top") {
     return (
       <header className="sticky top-0 z-30 hidden border-b border-gray-100 bg-white md:block">
@@ -24,6 +25,9 @@ export default function PortalTabBar({ variant = "bottom" }) {
               {tab.label}
             </NavLink>
           ))}
+          <div className="ml-auto">
+            <PortalChatButton unreadCount={unreadCount} />
+          </div>
         </nav>
       </header>
     );
