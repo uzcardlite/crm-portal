@@ -1,11 +1,12 @@
-name: Build Release AAB
+name: Build Release (APK + AAB)
 
 # Manual only. Trigger from the Actions tab AFTER the signing secrets are set:
 #   ANDROID_KEYSTORE_BASE64  (base64 of the upload keystore file)
 #   ANDROID_KEYSTORE_PASSWORD
 #   ANDROID_KEY_ALIAS
 #   ANDROID_KEY_PASSWORD
-# Produces a signed app-release.aab for the Play Console.
+# Produces a signed app-release.apk (for direct/Telegram distribution) AND a
+# signed app-release.aab (for the Play Console later).
 on:
   workflow_dispatch: {}
 
@@ -50,16 +51,22 @@ jobs:
       - name: Make gradlew executable
         run: chmod +x android/gradlew
 
-      - name: Build signed release AAB
+      - name: Build signed release APK + AAB
         working-directory: android
-        run: ./gradlew bundleRelease
+        run: ./gradlew assembleRelease bundleRelease
         env:
           ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/upload.keystore
           ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
           ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
           ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
-      - name: Upload AAB artifact
+      - name: Upload signed APK (direct / Telegram)
+        uses: actions/upload-artifact@v4
+        with:
+          name: farzandim-release-apk
+          path: android/app/build/outputs/apk/release/app-release.apk
+
+      - name: Upload AAB (Play Console)
         uses: actions/upload-artifact@v4
         with:
           name: farzandim-release-aab
