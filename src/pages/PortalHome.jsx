@@ -1,5 +1,4 @@
 import { useCallback, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
 import { Banknote, CalendarCheck, CalendarX, GraduationCap } from "lucide-react";
 import Badge from "../components/ui/Badge";
 import Card from "../components/ui/Card";
@@ -23,7 +22,7 @@ import {
 } from "../api/portal";
 import { usePortalAuth } from "../context/PortalAuthContext";
 import { usePortalResource } from "../hooks/usePortalResource";
-import { DAY_LABELS, PORTAL_QUICK_LINKS } from "../constants/portal";
+import { DAY_LABELS } from "../constants/portal";
 import { formatDate, formatMoney, formatMonth } from "../utils/format";
 import {
   dayKeyFromDate,
@@ -153,28 +152,6 @@ export default function PortalHome() {
       >
         {students}
       </ChildSwitcher>
-
-      {/* Quick-access tiles for the sections that have no bottom tab
-          (moved here from the removed slide-in drawer). */}
-      <div className="grid grid-cols-2 gap-3">
-        {PORTAL_QUICK_LINKS.map((link) => {
-          const Icon = link.icon;
-          return (
-            <Link
-              key={link.to}
-              to={link.to}
-              className="flex items-center gap-3 rounded-card border border-gray-100 bg-white p-4 shadow-card transition-shadow active:shadow-card-hover"
-            >
-              <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-accent-light/30 text-accent-dark">
-                <Icon size={20} />
-              </span>
-              <span className="truncate text-sm font-medium text-gray-900">
-                {link.label}
-              </span>
-            </Link>
-          );
-        })}
-      </div>
 
       {/* Two headline numbers: attendance this month and the grade average. */}
       {summary.loading || grades.loading ? (
