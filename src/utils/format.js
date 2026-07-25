@@ -23,6 +23,18 @@ export function formatDateTime(value) {
   return new Date(value).toLocaleString("uz-UZ");
 }
 
+// "2026-07-14T09:00:00" -> "09:00"
+export function formatTime(value) {
+  if (!value) return EMPTY_VALUE;
+  return new Date(value).toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
+}
+
+// A bare "HH:MM:SS" clock string (backend `time` field) -> "HH:MM".
+export function formatClock(value) {
+  if (!value) return EMPTY_VALUE;
+  return String(value).slice(0, 5);
+}
+
 // 1250000 -> "1 250 000 so'm"
 export function formatMoney(value) {
   if (value === null || value === undefined) return EMPTY_VALUE;

@@ -58,3 +58,81 @@ export function getPortalSchedule(studentId) {
     .get(`/api/v1/portal/students/${studentId}/schedule`)
     .then((res) => res.data);
 }
+
+// --- menu ------------------------------------------------------------------
+
+// `range` is "today" (default) or "week"; both are keyed off the server's
+// today, so no date is sent from the client.
+export function getPortalMenu(studentId, range = "week") {
+  return portalClient
+    .get("/api/v1/portal/menu", { params: { student_id: studentId, range } })
+    .then((res) => res.data);
+}
+
+// --- turnstile -------------------------------------------------------------
+
+export function getPortalTurnstile(studentId) {
+  return portalClient
+    .get("/api/v1/portal/turnstile", { params: { student_id: studentId } })
+    .then((res) => res.data);
+}
+
+// --- chat ------------------------------------------------------------------
+
+// Threads are opened by a teacher; a parent can only read/reply. The list is
+// scoped to one child on the server via `student_id`.
+export function getPortalChatThreads(studentId) {
+  return portalClient
+    .get("/api/v1/portal/chat/threads", { params: { student_id: studentId } })
+    .then((res) => res.data);
+}
+
+export function getPortalChatMessages(threadId) {
+  return portalClient
+    .get(`/api/v1/portal/chat/threads/${threadId}/messages`)
+    .then((res) => res.data);
+}
+
+export function sendPortalChatMessage(threadId, body) {
+  return portalClient
+    .post(`/api/v1/portal/chat/threads/${threadId}/messages`, { body })
+    .then((res) => res.data);
+}
+
+// Clears the teacher's unread messages in this thread (never the parent's own).
+export function markPortalChatRead(threadId) {
+  return portalClient
+    .post(`/api/v1/portal/chat/threads/${threadId}/read`)
+    .then((res) => res.data);
+}
+
+// --- booking ---------------------------------------------------------------
+
+export function getPortalBookingSlots(studentId) {
+  return portalClient
+    .get("/api/v1/portal/booking/slots", { params: { student_id: studentId } })
+    .then((res) => res.data);
+}
+
+export function getPortalBookings(studentId) {
+  return portalClient
+    .get("/api/v1/portal/booking/bookings", { params: { student_id: studentId } })
+    .then((res) => res.data);
+}
+
+// parent_phone is taken from the JWT on the server — never sent in the body.
+export function createPortalBooking(slotId, studentId, note) {
+  return portalClient
+    .post("/api/v1/portal/booking/bookings", {
+      slot_id: slotId,
+      student_id: studentId,
+      note: note || null,
+    })
+    .then((res) => res.data);
+}
+
+export function cancelPortalBooking(bookingId) {
+  return portalClient
+    .post(`/api/v1/portal/booking/bookings/${bookingId}/cancel`)
+    .then((res) => res.data);
+}

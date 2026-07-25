@@ -11,6 +11,11 @@ import PortalGrades from "./pages/PortalGrades";
 import PortalPayments from "./pages/PortalPayments";
 import PortalSchedule from "./pages/PortalSchedule";
 import PortalProfile from "./pages/PortalProfile";
+import PortalChat from "./pages/PortalChat";
+import PortalChatThread from "./pages/PortalChatThread";
+import PortalMenu from "./pages/PortalMenu";
+import PortalTurnstile from "./pages/PortalTurnstile";
+import PortalBooking from "./pages/PortalBooking";
 import { useNativeBackButton } from "./hooks/useNativeBackButton";
 import { setupNativeStatusBar } from "./utils/nativeStatusBar";
 
@@ -38,6 +43,11 @@ export default function App() {
             <Route path="/grades" element={<PortalGrades />} />
             <Route path="/payments" element={<PortalPayments />} />
             <Route path="/schedule" element={<PortalSchedule />} />
+            <Route path="/chat" element={<PortalChat />} />
+            <Route path="/chat/:threadId" element={<PortalChatThread />} />
+            <Route path="/menu" element={<PortalMenu />} />
+            <Route path="/turnstile" element={<PortalTurnstile />} />
+            <Route path="/booking" element={<PortalBooking />} />
             <Route path="/profile" element={<PortalProfile />} />
           </Route>
           {/* Unknown path stays inside the portal instead of a 404. */}

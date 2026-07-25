@@ -1,11 +1,15 @@
 // Portal (ota-ona/o'quvchi kabineti) konstantalari.
 import {
   Banknote,
+  CalendarClock,
   CalendarCheck,
   CalendarDays,
+  DoorOpen,
   GraduationCap,
   Home,
+  MessageCircle,
   User,
+  UtensilsCrossed,
 } from "lucide-react";
 
 // Backend weekday keys, Monday-first (matches crm-frontend's Groups/Schedule order).
@@ -63,6 +67,23 @@ export const PORTAL_MENU = [
   { to: "/attendance", label: "Davomat", icon: CalendarCheck },
   { to: "/grades", label: "Baholar", icon: GraduationCap },
   { to: "/schedule", label: "Dars jadvali", icon: CalendarDays },
+  { to: "/chat", label: "Chat", icon: MessageCircle },
+  { to: "/menu", label: "Menyu", icon: UtensilsCrossed },
+  { to: "/turnstile", label: "Kirish-chiqish", icon: DoorOpen },
+  { to: "/booking", label: "Konsultatsiya", icon: CalendarClock },
   { to: "/payments", label: "To'lovlar", icon: Banknote },
   { to: "/profile", label: "Profil", icon: User },
 ];
+
+// Parent-facing booking status: label + Badge variant.
+export const BOOKING_STATUS = {
+  pending: { label: "Kutilmoqda", variant: "warning" },
+  confirmed: { label: "Tasdiqlandi", variant: "success" },
+  cancelled: { label: "Bekor qilindi", variant: "danger" },
+};
+
+// Turnstile direction: label + tone for the timeline icon.
+export const TURNSTILE_DIRECTION = {
+  in: { label: "Kirdi", tone: "success" },
+  out: { label: "Chiqdi", tone: "danger" },
+};
