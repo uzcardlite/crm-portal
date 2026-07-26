@@ -6,5 +6,15 @@
     "androidScheme": "https",
     "url": "https://portal.ncrm.uz",
     "cleartext": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 2500,
+      "launchAutoHide": true,
+      "backgroundColor": "#12182B",
+      "androidScaleType": "CENTER_CROP",
+      "showSpinner": false,
+      "splashFullScreen": true
+    }
   }
 }
