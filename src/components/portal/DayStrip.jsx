@@ -16,7 +16,7 @@ export default function DayStrip({ days = [], activeIso, onSelect }) {
               "flex h-14 w-12 flex-shrink-0 flex-col items-center justify-center rounded-card border transition-colors",
               isActive
                 ? "border-accent bg-accent-light/40 text-accent-dark"
-                : "border-gray-200 bg-white text-gray-600",
+                : "border-line bg-surface text-fg-secondary",
               // Today keeps a ring while another day is selected.
               !isActive && entry.isToday && "ring-1 ring-accent",
             )}

@@ -73,7 +73,7 @@ export default function PortalTurnstile() {
                   return (
                     <div
                       key={event.id}
-                      className="flex items-center gap-3 border-b border-gray-50 py-3 last:border-0"
+                      className="flex items-center gap-3 border-b border-line py-3 last:border-0"
                     >
                       <span
                         className={cn(
@@ -84,14 +84,14 @@ export default function PortalTurnstile() {
                         <Icon size={16} />
                       </span>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-medium text-gray-900">{meta.label}</p>
+                        <p className="text-sm font-medium text-fg">{meta.label}</p>
                         {event.device_name && (
-                          <p className="mt-0.5 truncate text-xs text-gray-500">
+                          <p className="mt-0.5 truncate text-xs text-fg-muted">
                             {event.device_name}
                           </p>
                         )}
                       </div>
-                      <span className="flex-shrink-0 text-sm font-semibold tabular-nums text-gray-900">
+                      <span className="flex-shrink-0 text-sm font-semibold tabular-nums text-fg">
                         {formatTime(event.event_time)}
                       </span>
                     </div>

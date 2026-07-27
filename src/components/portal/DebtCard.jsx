@@ -12,7 +12,7 @@ export default function DebtCard({ amount, dueLabel }) {
     return (
       <Card padding="p-4" className="border-success-bg bg-success-bg">
         <div className="flex items-center gap-3">
-          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white text-success">
+          <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-surface text-success">
             <CheckCircle2 size={20} />
           </span>
           <p className="text-sm font-semibold text-success">Qarzdorlik yo'q</p>
@@ -24,7 +24,7 @@ export default function DebtCard({ amount, dueLabel }) {
   return (
     <Card padding="p-4" className="border-danger-bg bg-danger-bg">
       <div className="flex items-center gap-3">
-        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-white text-danger">
+        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-surface text-danger">
           <AlertCircle size={20} />
         </span>
         <div className="min-w-0">
@@ -32,7 +32,7 @@ export default function DebtCard({ amount, dueLabel }) {
           <p className="text-lg font-semibold tabular-nums text-danger">
             {formatMoney(value)}
           </p>
-          {dueLabel && <p className="text-xs text-gray-500">{dueLabel}</p>}
+          {dueLabel && <p className="text-xs text-danger/70">{dueLabel}</p>}
         </div>
       </div>
     </Card>

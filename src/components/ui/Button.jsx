@@ -2,8 +2,8 @@ import { cn } from "../../utils/cn";
 
 const VARIANT_STYLES = {
   primary: "bg-accent text-accent-dark hover:bg-accent-light",
-  secondary: "bg-white border border-gray-300 text-gray-700 hover:bg-gray-50",
-  ghost: "bg-transparent text-gray-700 hover:bg-gray-100",
+  secondary: "bg-surface border border-line-strong text-fg-secondary hover:bg-surface-sunken",
+  ghost: "bg-transparent text-fg-secondary hover:bg-surface-sunken",
   danger: "bg-danger text-white hover:bg-danger/90",
 };
 

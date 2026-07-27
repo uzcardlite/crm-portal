@@ -18,12 +18,12 @@ export default function PortalChatButton({ unreadCount = 0 }) {
           ? `Ustoz bilan chat, ${unreadCount} o'qilmagan xabar`
           : "Ustoz bilan chat"
       }
-      className="relative flex items-center gap-1.5 rounded-full bg-accent-light/30 py-1.5 pl-3 pr-3.5 text-accent-dark transition-colors active:bg-accent-light/60"
+      className="relative flex items-center gap-1.5 rounded-full bg-accent-light/30 py-1.5 pl-3 pr-3.5 text-accent-dark transition-colors active:bg-accent-light/60 dark:bg-accent/15 dark:text-accent-light dark:active:bg-accent/25"
     >
       <MessageCircle size={18} />
       <span className="text-sm font-semibold">Ustoz</span>
       {unreadCount > 0 && (
-        <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-white" />
+        <span className="absolute -right-0.5 -top-0.5 h-2.5 w-2.5 rounded-full bg-accent ring-2 ring-surface" />
       )}
     </button>
   );

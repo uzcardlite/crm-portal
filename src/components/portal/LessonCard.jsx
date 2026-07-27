@@ -18,12 +18,12 @@ export default function LessonCard({ time, groupName, teacherName, roomName, col
   const rail = HUE_BORDERS[colorIndex % HUE_BORDERS.length];
 
   return (
-    <div className="flex gap-3 rounded-card border border-gray-100 bg-white p-3 shadow-card">
+    <div className="flex gap-3 rounded-card border border-line bg-surface p-3 shadow-card">
       <span className={`w-1 flex-shrink-0 rounded-full ${rail}`} />
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold tabular-nums text-gray-900">{time}</p>
-        <p className="truncate text-sm font-medium text-gray-900">{groupName}</p>
-        <p className="truncate text-xs text-gray-500">
+        <p className="text-sm font-semibold tabular-nums text-fg">{time}</p>
+        <p className="truncate text-sm font-medium text-fg">{groupName}</p>
+        <p className="truncate text-xs text-fg-muted">
           {teacherName || EMPTY_VALUE} · {roomName || EMPTY_VALUE}
         </p>
       </div>

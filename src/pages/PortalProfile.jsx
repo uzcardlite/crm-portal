@@ -1,22 +1,26 @@
 import { useCallback, useMemo, useState } from "react";
-import { Building2, IdCard, LogOut, Phone, UsersRound } from "lucide-react";
+import { Building2, IdCard, LogOut, Moon, Phone, Sun, UsersRound } from "lucide-react";
 import Avatar from "../components/ui/Avatar";
 import Button from "../components/ui/Button";
 import Card from "../components/ui/Card";
 import Modal from "../components/ui/Modal";
 import Skeleton from "../components/ui/Skeleton";
+import ThemeToggle from "../components/ui/ThemeToggle";
 import EventRow from "../components/portal/EventRow";
 import PortalErrorState from "../components/portal/PortalErrorState";
 import SectionHeader from "../components/portal/SectionHeader";
 import { getPortalSchedule } from "../api/portal";
 import { usePortalAuth } from "../context/PortalAuthContext";
 import { usePortalResource } from "../hooks/usePortalResource";
+import { useTheme } from "../hooks/useTheme";
 import { EMPTY_VALUE } from "../utils/format";
 import { cn } from "../utils/cn";
 
 export default function PortalProfile() {
   const { students, activeStudentId, activeStudent, selectStudent, phone, logout } =
     usePortalAuth();
+  const { theme } = useTheme();
+  const isDark = theme === "dark";
   const [confirmOpen, setConfirmOpen] = useState(false);
 
   const enabled = Boolean(activeStudentId);
@@ -29,7 +33,7 @@ export default function PortalProfile() {
     ...new Set(items.map((item) => item.teacher_name).filter(Boolean)),
   ].join(", ");
 
-  const emptyValue = <span className="text-gray-400">{EMPTY_VALUE}</span>;
+  const emptyValue = <span className="text-fg-faint">{EMPTY_VALUE}</span>;
 
   return (
     <>
@@ -41,15 +45,15 @@ export default function PortalProfile() {
             name={activeStudent?.full_name}
           />
           <div className="min-w-0">
-            <p className="truncate text-base font-semibold text-gray-900">
+            <p className="truncate text-base font-semibold text-fg">
               {activeStudent?.full_name}
             </p>
             {schedule.loading ? (
               <Skeleton className="mt-1 h-4 w-32" />
             ) : (
-              <p className="truncate text-sm text-gray-500">{groupNames || EMPTY_VALUE}</p>
+              <p className="truncate text-sm text-fg-muted">{groupNames || EMPTY_VALUE}</p>
             )}
-            <p className="truncate text-xs text-gray-400">{activeStudent?.tenant_name}</p>
+            <p className="truncate text-xs text-fg-faint">{activeStudent?.tenant_name}</p>
           </div>
         </div>
       </Card>
@@ -68,16 +72,16 @@ export default function PortalProfile() {
                     onClick={() => selectStudent(student.id)}
                     aria-pressed={isActive}
                     className={cn(
-                      "flex items-center gap-3 rounded-card border border-gray-100 p-2 text-left transition-colors",
+                      "flex items-center gap-3 rounded-card border border-line p-2 text-left transition-colors",
                       isActive && "ring-1 ring-accent",
                     )}
                   >
                     <Avatar size="sm" photoUrl={student.photo_url} name={student.full_name} />
                     <span className="min-w-0">
-                      <span className="block truncate text-sm font-medium text-gray-900">
+                      <span className="block truncate text-sm font-medium text-fg">
                         {student.full_name}
                       </span>
-                      <span className="block truncate text-xs text-gray-500">
+                      <span className="block truncate text-xs text-fg-muted">
                         {student.tenant_name}
                       </span>
                     </span>
@@ -116,6 +120,23 @@ export default function PortalProfile() {
         )}
       </Card>
 
+      <Card padding="p-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full bg-surface-sunken text-fg-muted">
+              {isDark ? <Moon size={16} /> : <Sun size={16} />}
+            </span>
+            <div className="min-w-0">
+              <p className="truncate text-sm font-medium text-fg">Tungi rejim</p>
+              <p className="truncate text-xs text-fg-muted">
+                {isDark ? "Yoqilgan" : "O'chirilgan"}
+              </p>
+            </div>
+          </div>
+          <ThemeToggle />
+        </div>
+      </Card>
+
       <Button variant="danger" className="w-full" onClick={() => setConfirmOpen(true)}>
         <LogOut size={16} />
         Chiqish
@@ -136,7 +157,7 @@ export default function PortalProfile() {
           </>
         }
       >
-        <p className="text-sm text-gray-700">Kabinetdan chiqmoqchimisiz?</p>
+        <p className="text-sm text-fg-secondary">Kabinetdan chiqmoqchimisiz?</p>
       </Modal>
     </>
   );

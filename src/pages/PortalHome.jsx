@@ -119,18 +119,19 @@ export default function PortalHome() {
 
   return (
     <>
-      {/* Greeting — a soft amber-washed block with a faint koshin-star
-          watermark in the corner (the national accent, kept very light). */}
-      <div className="relative overflow-hidden rounded-card border border-accent-light/40 bg-accent-light/10 px-4 py-4">
+      {/* Greeting — a soft amber gradient wash with a faint koshin-star
+          watermark in the corner. Amber glows warm on the light card and on the
+          deep navy of night mode alike (the national accent). */}
+      <div className="relative overflow-hidden rounded-card border border-accent-light/40 bg-gradient-to-br from-accent-light/25 to-accent-light/5 px-4 py-4 dark:border-accent/25 dark:from-accent/15 dark:to-accent/[0.03]">
         <KoshinStar
           size={150}
           strokeWidth={4}
-          className="pointer-events-none absolute -right-6 -top-8 text-accent/[0.06]"
+          className="pointer-events-none absolute -right-6 -top-8 text-accent/[0.07] dark:text-accent/[0.12]"
         />
         <div className="relative flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-semibold text-accent-dark">Assalomu alaykum!</h1>
-            <p className="mt-1 truncate text-sm text-gray-500">
+            <h1 className="text-2xl font-semibold text-accent-dark dark:text-accent-light">Assalomu alaykum!</h1>
+            <p className="mt-1 truncate text-sm text-fg-muted">
               {activeStudent
                 ? `${activeStudent.full_name} · ${activeStudent.tenant_name}`
                 : ""}
@@ -167,22 +168,22 @@ export default function PortalHome() {
                 {attendancePercent !== null ? `${attendancePercent}%` : null}
               </ProgressRing>
               <div className="min-w-0">
-                <p className="text-xs text-gray-500">Davomat</p>
-                <p className="text-xs text-gray-400">
+                <p className="text-xs text-fg-muted">Davomat</p>
+                <p className="text-xs text-fg-faint">
                   {attendancePercent === null ? "Ma'lumot yo'q" : "Bu oy"}
                 </p>
               </div>
             </div>
           </Card>
           <Card padding="p-4">
-            <p className="text-2xl font-semibold tabular-nums text-gray-900">
+            <p className="text-2xl font-semibold tabular-nums text-fg">
               {averagePercent === null ? (
-                <span className="text-gray-400">—</span>
+                <span className="text-fg-faint">—</span>
               ) : (
                 `${averagePercent}%`
               )}
             </p>
-            <p className="mt-1 text-xs text-gray-500">O'rtacha baho</p>
+            <p className="mt-1 text-xs text-fg-muted">O'rtacha baho</p>
           </Card>
         </div>
       )}

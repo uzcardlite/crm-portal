@@ -4,7 +4,7 @@ const VARIANT_STYLES = {
   success: "bg-success-bg text-success",
   danger: "bg-danger-bg text-danger",
   warning: "bg-accent-light/40 text-accent-dark",
-  neutral: "bg-gray-100 text-gray-600",
+  neutral: "bg-surface-sunken text-fg-secondary",
 };
 
 export default function Badge({ variant = "neutral", className, children }) {

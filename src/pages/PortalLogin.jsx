@@ -155,8 +155,8 @@ export default function PortalLogin() {
           <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-card">
             <img src="/logo.svg" alt="Logo" className="h-full w-full object-cover" />
           </span>
-          <h1 className="text-xl font-semibold text-gray-900">Ota-ona kabineti</h1>
-          <p className="text-sm text-gray-500">
+          <h1 className="text-xl font-semibold text-fg">Ota-ona kabineti</h1>
+          <p className="text-sm text-fg-muted">
             Farzandingiz davomati, baholari va to'lovlari
           </p>
         </div>
@@ -215,10 +215,10 @@ export default function PortalLogin() {
                     setErrors({});
                   }}
                 />
-                <span className="text-sm text-gray-500">{phone}</span>
+                <span className="text-sm text-fg-muted">{phone}</span>
               </div>
 
-              <p className="text-sm text-gray-700">
+              <p className="text-sm text-fg-secondary">
                 Telegramga yuborilgan 6 xonali kodni kiriting
               </p>
 
@@ -235,7 +235,7 @@ export default function PortalLogin() {
                   autoFocus
                   aria-label="Tasdiqlash kodi"
                   aria-invalid={errors.code ? true : undefined}
-                  className="w-full rounded-btn border border-gray-300 px-3 py-3 text-center text-2xl tracking-[0.4em] text-gray-900 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                  className="w-full rounded-btn border border-line-strong px-3 py-3 text-center text-2xl tracking-[0.4em] text-fg focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
                 />
                 {errors.code && <p className="mt-1.5 text-xs text-danger">{errors.code}</p>}
               </div>
@@ -251,7 +251,7 @@ export default function PortalLogin() {
               </Button>
 
               {cooldown > 0 ? (
-                <p className="mt-3 w-full text-center text-sm text-gray-400">
+                <p className="mt-3 w-full text-center text-sm text-fg-faint">
                   Qayta yuborish {formatCountdown(cooldown)} dan keyin
                 </p>
               ) : (
@@ -259,7 +259,7 @@ export default function PortalLogin() {
                   type="button"
                   disabled={submitting}
                   onClick={() => sendCode(phone.trim())}
-                  className="mt-3 w-full text-center text-sm font-medium text-accent-dark transition-colors disabled:opacity-50"
+                  className="mt-3 w-full text-center text-sm font-medium text-accent-dark transition-colors disabled:opacity-50 dark:text-accent"
                 >
                   Kodni qayta yuborish
                 </button>
@@ -269,7 +269,7 @@ export default function PortalLogin() {
         </Card>
 
         {step === "phone" && (
-          <p className="mt-3 text-center text-xs text-gray-500">
+          <p className="mt-3 text-center text-xs text-fg-muted">
             Tasdiqlash kodi Telegram bot orqali yuboriladi.
           </p>
         )}

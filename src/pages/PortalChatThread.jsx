@@ -127,11 +127,11 @@ export default function PortalChatThread() {
         <Link
           to="/chat"
           aria-label="Orqaga"
-          className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-btn text-gray-500 transition-colors active:bg-gray-100"
+          className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-btn text-fg-muted transition-colors active:bg-surface-sunken"
         >
           <ArrowLeft size={16} />
         </Link>
-        <h1 className="truncate text-lg font-semibold text-gray-900">{title}</h1>
+        <h1 className="truncate text-lg font-semibold text-fg">{title}</h1>
       </div>
 
       <div className="mt-4 flex-1">
@@ -147,7 +147,7 @@ export default function PortalChatThread() {
         ) : error ? (
           <PortalErrorState onRetry={() => window.location.reload()} />
         ) : messages.length === 0 ? (
-          <p className="py-10 text-center text-sm text-gray-400">
+          <p className="py-10 text-center text-sm text-fg-faint">
             Hali xabar yo'q. Birinchi bo'lib yozing.
           </p>
         ) : (
@@ -161,14 +161,14 @@ export default function PortalChatThread() {
                     "max-w-[80%] rounded-card px-3 py-2",
                     isParent
                       ? "self-end bg-accent text-accent-dark"
-                      : "self-start bg-white text-gray-900 shadow-card",
+                      : "self-start bg-surface text-fg shadow-card",
                   )}
                 >
                   <p className="whitespace-pre-wrap break-words text-sm">{message.body}</p>
                   <p
                     className={cn(
                       "mt-1 text-right text-[11px]",
-                      isParent ? "text-accent-dark/70" : "text-gray-400",
+                      isParent ? "text-accent-dark/70" : "text-fg-faint",
                     )}
                   >
                     {formatTime(message.created_at)}
@@ -190,7 +190,7 @@ export default function PortalChatThread() {
           onChange={(event) => setDraft(event.target.value)}
           placeholder="Xabar yozing..."
           rows={1}
-          className="max-h-32 flex-1 resize-none rounded-btn border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+          className="max-h-32 flex-1 resize-none rounded-btn border border-line-strong bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
         />
         <button
           type="submit"

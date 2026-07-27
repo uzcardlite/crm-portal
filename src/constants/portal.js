@@ -43,7 +43,7 @@ export const ATTENDANCE_LABELS = Object.fromEntries(
 );
 
 // Kalit yo'q (dars bo'lmagan / belgilanmagan kun): fon YO'Q, faqat matn rangi.
-export const ATTENDANCE_EMPTY_CLASS = "text-gray-300";
+export const ATTENDANCE_EMPTY_CLASS = "text-fg-faint";
 
 // Bugungi kun katagiga qo'shiladi (status klassi ustiga).
 export const TODAY_RING_CLASS = "ring-1 ring-accent";

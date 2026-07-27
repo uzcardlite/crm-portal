@@ -100,8 +100,8 @@ export default function PortalGrades() {
                   {`${average}%`}
                 </ProgressRing>
                 <div className="min-w-0">
-                  <p className="text-xs text-gray-500">O'rtacha baho</p>
-                  <p className="text-xl font-semibold tabular-nums text-gray-900">
+                  <p className="text-xs text-fg-muted">O'rtacha baho</p>
+                  <p className="text-xl font-semibold tabular-nums text-fg">
                     {average}%
                   </p>
                 </div>
@@ -123,7 +123,7 @@ export default function PortalGrades() {
                       "flex items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
                       isActive
                         ? "border-accent bg-accent-light/40 text-accent-dark"
-                        : "border-gray-200 bg-white text-gray-600",
+                        : "border-line bg-surface text-fg-secondary",
                     )}
                   >
                     {group.name}

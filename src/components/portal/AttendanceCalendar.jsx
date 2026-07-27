@@ -22,7 +22,7 @@ export default function AttendanceCalendar({ year, month, days = {}, todayIso })
 
   return (
     <div>
-      <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-gray-400">
+      <div className="grid grid-cols-7 gap-1 text-center text-[11px] font-medium text-fg-faint">
         {WEEKDAY_HEADER.map((label) => (
           <span key={label}>{label}</span>
         ))}
@@ -57,7 +57,7 @@ export default function AttendanceCalendar({ year, month, days = {}, todayIso })
         {Object.entries(ATTENDANCE_CELL).map(([status, cell]) => (
           <span
             key={status}
-            className="inline-flex items-center gap-1.5 text-xs text-gray-500"
+            className="inline-flex items-center gap-1.5 text-xs text-fg-muted"
           >
             <span className={cn("h-3 w-3 rounded-full", cell.className)} />
             {cell.label}

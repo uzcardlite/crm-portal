@@ -88,7 +88,7 @@ export default function PortalSchedule() {
         <Link
           to="/"
           aria-label="Orqaga"
-          className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-btn text-gray-500 transition-colors"
+          className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-btn text-fg-muted transition-colors"
         >
           <ArrowLeft size={16} />
         </Link>
@@ -116,7 +116,7 @@ export default function PortalSchedule() {
 
           <Card padding="p-4">
             <div className="flex flex-col gap-3">
-              <p className="text-sm font-semibold text-gray-900">{formatDate(selectedDate)}</p>
+              <p className="text-sm font-semibold text-fg">{formatDate(selectedDate)}</p>
               {selectedLessons.length === 0 ? (
                 <EmptyState size="sm" icon={CalendarX} title="Bu kuni dars yo'q" />
               ) : (
@@ -142,12 +142,12 @@ export default function PortalSchedule() {
                   {unscheduled.map((item) => (
                     <div
                       key={item.group_id}
-                      className="border-b border-gray-50 py-3 last:border-0"
+                      className="border-b border-line py-3 last:border-0"
                     >
-                      <p className="truncate text-sm font-medium text-gray-900">
+                      <p className="truncate text-sm font-medium text-fg">
                         {item.group_name}
                       </p>
-                      <p className="mt-0.5 text-xs text-gray-500">Jadval belgilanmagan</p>
+                      <p className="mt-0.5 text-xs text-fg-muted">Jadval belgilanmagan</p>
                     </div>
                   ))}
                 </div>

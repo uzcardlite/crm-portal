@@ -10,7 +10,7 @@ export default function Card({
   return (
     <div
       className={cn(
-        "rounded-card border border-gray-100 bg-white shadow-card",
+        "rounded-card border border-line bg-surface shadow-card",
         // Interactive cards lift softly — never `hover:shadow-md`.
         hoverable && "transition-shadow hover:shadow-card-hover",
         padding,

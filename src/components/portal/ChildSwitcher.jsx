@@ -50,7 +50,7 @@ export default function ChildSwitcher({ children: students = [], activeId, onCha
               "flex items-center gap-2 whitespace-nowrap rounded-full border px-3 py-1.5 text-sm font-medium transition-colors",
               isActive
                 ? "border-accent bg-accent-light/40 text-accent-dark"
-                : "border-gray-200 bg-white text-gray-600",
+                : "border-line bg-surface text-fg-secondary",
             )}
           >
             <Avatar size="sm" photoUrl={student.photo_url} name={student.full_name} />

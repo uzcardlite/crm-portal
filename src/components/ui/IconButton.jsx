@@ -3,8 +3,8 @@ import { cn } from "../../utils/cn";
 // Square icon-only action button. `aria-label` is REQUIRED — an icon alone
 // has no accessible name.
 const TONE_STYLES = {
-  default: "text-gray-500 hover:bg-gray-100 hover:text-gray-700",
-  danger: "text-gray-400 hover:bg-danger-bg hover:text-danger",
+  default: "text-fg-muted hover:bg-surface-sunken hover:text-fg-secondary",
+  danger: "text-fg-faint hover:bg-danger-bg hover:text-danger",
 };
 
 export default function IconButton({

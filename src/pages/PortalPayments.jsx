@@ -72,16 +72,16 @@ export default function PortalPayments() {
 
           <div className="grid grid-cols-2 gap-3">
             <Card padding="p-4">
-              <p className="text-lg font-semibold tabular-nums text-gray-900">
+              <p className="text-lg font-semibold tabular-nums text-fg">
                 {formatMoney(totals.thisMonth)}
               </p>
-              <p className="mt-1 text-xs text-gray-500">Bu oy to'langan</p>
+              <p className="mt-1 text-xs text-fg-muted">Bu oy to'langan</p>
             </Card>
             <Card padding="p-4">
-              <p className="text-lg font-semibold tabular-nums text-gray-900">
+              <p className="text-lg font-semibold tabular-nums text-fg">
                 {formatMoney(totals.overall)}
               </p>
-              <p className="mt-1 text-xs text-gray-500">Jami to'langan</p>
+              <p className="mt-1 text-xs text-fg-muted">Jami to'langan</p>
             </Card>
           </div>
 
@@ -107,7 +107,7 @@ export default function PortalPayments() {
                   </div>
                   {/* The endpoint caps the history at 100 rows and has no
                       pagination — say so instead of implying a full archive. */}
-                  <p className="text-xs text-gray-400">So'nggi 100 ta to'lov</p>
+                  <p className="text-xs text-fg-faint">So'nggi 100 ta to'lov</p>
                 </>
               )}
             </div>

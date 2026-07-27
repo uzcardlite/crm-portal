@@ -51,25 +51,25 @@ export default function Modal({
   // NOTE: clicking the backdrop deliberately does NOT close the dialog —
   // long forms would lose their data on a stray click.
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-900/40 px-4 py-6">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-4 py-6">
       <div
         role="dialog"
         aria-modal="true"
         aria-labelledby={titleId}
         className={cn(
-          "flex max-h-[90vh] w-full flex-col rounded-card bg-white shadow-card",
+          "flex max-h-[90vh] w-full flex-col rounded-card bg-surface shadow-card",
           !hasCustomWidth && (SIZE_STYLES[size] ?? SIZE_STYLES.md),
           className,
         )}
       >
-        <div className="sticky top-0 flex items-center justify-between gap-3 rounded-t-card border-b border-gray-100 bg-white px-6 py-4">
-          <h2 id={titleId} className="text-lg font-semibold text-gray-900">
+        <div className="sticky top-0 flex items-center justify-between gap-3 rounded-t-card border-b border-line bg-surface px-6 py-4">
+          <h2 id={titleId} className="text-lg font-semibold text-fg">
             {title}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="flex-shrink-0 text-gray-400 transition-colors hover:text-gray-600"
+            className="flex-shrink-0 text-fg-faint transition-colors hover:text-fg-secondary"
             aria-label="Yopish"
           >
             <X size={20} />
@@ -79,7 +79,7 @@ export default function Modal({
         <div className="flex-1 overflow-y-auto px-6 py-4">{children}</div>
 
         {footer && (
-          <div className="sticky bottom-0 flex justify-end gap-2 rounded-b-card border-t border-gray-100 bg-white px-6 py-4">
+          <div className="sticky bottom-0 flex justify-end gap-2 rounded-b-card border-t border-line bg-surface px-6 py-4">
             {footer}
           </div>
         )}

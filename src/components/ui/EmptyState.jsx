@@ -1,4 +1,5 @@
 import Button from "./Button";
+import KoshinStar from "./KoshinStar";
 import { cn } from "../../utils/cn";
 
 // size="md" (default) — page-level empty state.
@@ -24,24 +25,32 @@ export default function EmptyState({
   return (
     <div
       className={cn(
-        "flex flex-col items-center justify-center rounded-card border border-dashed border-gray-200 bg-white text-center",
+        "relative flex flex-col items-center justify-center overflow-hidden rounded-card border border-dashed border-line-strong bg-surface text-center",
         styles.wrapper,
         className,
       )}
     >
+      {/* Faint national watermark tying every empty screen to the brand. */}
+      {size !== "sm" && (
+        <KoshinStar
+          size={132}
+          strokeWidth={4}
+          className="pointer-events-none absolute -right-10 -top-10 text-accent/[0.05] dark:text-accent/[0.1]"
+        />
+      )}
       {Icon && (
         <span
           className={cn(
-            "flex items-center justify-center rounded-full bg-accent-light/30 text-accent-dark",
+            "relative flex items-center justify-center rounded-full bg-accent-light/30 text-accent-dark dark:bg-accent/15 dark:text-accent",
             styles.icon,
           )}
         >
           <Icon size={styles.iconSize} />
         </span>
       )}
-      <div>
-        <h3 className={cn("font-semibold text-gray-900", styles.title)}>{title}</h3>
-        {description && <p className="mt-1 text-sm text-gray-500">{description}</p>}
+      <div className="relative">
+        <h3 className={cn("font-semibold text-fg", styles.title)}>{title}</h3>
+        {description && <p className="mt-1 text-sm text-fg-muted">{description}</p>}
       </div>
       {/* Legacy shorthand first, then the free-form slots. */}
       {actionLabel && (

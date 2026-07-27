@@ -22,7 +22,7 @@ export default function ProgressRing({
     >
       <svg width={size} height={size} className="-rotate-90" aria-hidden="true">
         <circle
-          className="text-gray-100"
+          className="text-line"
           cx={size / 2}
           cy={size / 2}
           r={radius}
@@ -44,9 +44,9 @@ export default function ProgressRing({
       </svg>
       <span className="absolute inset-0 flex items-center justify-center">
         {hasValue ? (
-          <span className="text-sm font-semibold text-accent-dark">{children}</span>
+          <span className="text-sm font-semibold text-accent-dark dark:text-accent">{children}</span>
         ) : (
-          <span className="text-sm text-gray-400">—</span>
+          <span className="text-sm text-fg-faint">—</span>
         )}
       </span>
     </div>

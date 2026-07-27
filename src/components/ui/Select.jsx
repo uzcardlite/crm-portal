@@ -17,7 +17,7 @@ export default function Select({
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={selectId} className="text-sm font-medium text-gray-700">
+        <label htmlFor={selectId} className="text-sm font-medium text-fg-secondary">
           {label}
         </label>
       )}
@@ -28,10 +28,10 @@ export default function Select({
         aria-describedby={error ? errorId : undefined}
         className={cn(
           // Same disabled treatment as Input/Textarea.
-          "rounded-btn border bg-white px-3 py-2 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400",
+          "rounded-btn border bg-surface px-3 py-2 text-sm text-fg focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:cursor-not-allowed disabled:bg-surface-sunken disabled:text-fg-faint",
           error
             ? "border-danger focus:ring-danger/30"
-            : "border-gray-300 focus:border-accent",
+            : "border-line-strong focus:border-accent",
           className,
         )}
         {...props}

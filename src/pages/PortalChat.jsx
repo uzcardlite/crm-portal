@@ -120,7 +120,7 @@ export default function PortalChat() {
             <Link
               key={thread.id}
               to={`/chat/${thread.id}`}
-              className="flex items-center gap-3 rounded-btn px-2 py-3 transition-colors active:bg-gray-100"
+              className="flex items-center gap-3 rounded-btn px-2 py-3 transition-colors active:bg-surface-sunken"
             >
               <Avatar
                 size="md"
@@ -129,15 +129,15 @@ export default function PortalChat() {
               />
               <div className="min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-2">
-                  <p className="truncate text-sm font-medium text-gray-900">
+                  <p className="truncate text-sm font-medium text-fg">
                     {thread.group_name || thread.student_full_name}
                   </p>
-                  <span className="flex-shrink-0 text-xs text-gray-400">
+                  <span className="flex-shrink-0 text-xs text-fg-faint">
                     {threadStamp(thread.last_message_at)}
                   </span>
                 </div>
                 <div className="mt-0.5 flex items-center justify-between gap-2">
-                  <p className="truncate text-xs text-gray-500">
+                  <p className="truncate text-xs text-fg-muted">
                     {thread.last_message_body || "Xabar yo'q"}
                   </p>
                   {thread.unread_count > 0 && (
@@ -161,7 +161,7 @@ export default function PortalChat() {
           </div>
         ) : teachersError ? (
           <div className="flex flex-col items-center gap-3 py-6 text-center">
-            <p className="text-sm text-gray-500">Ustozlarni yuklab bo'lmadi.</p>
+            <p className="text-sm text-fg-muted">Ustozlarni yuklab bo'lmadi.</p>
             <Button size="sm" variant="secondary" onClick={loadTeachers}>
               Qayta urinish
             </Button>
@@ -183,15 +183,15 @@ export default function PortalChat() {
                   type="button"
                   onClick={() => startThread(teacher)}
                   disabled={Boolean(openingId)}
-                  className="flex items-center gap-3 rounded-btn px-2 py-3 text-left transition-colors active:bg-gray-100 disabled:opacity-60"
+                  className="flex items-center gap-3 rounded-btn px-2 py-3 text-left transition-colors active:bg-surface-sunken disabled:opacity-60"
                 >
                   <Avatar size="md" name={teacher.teacher_name} />
                   <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-gray-900">
+                    <p className="truncate text-sm font-medium text-fg">
                       {teacher.teacher_name}
                     </p>
                     {teacher.group_name && (
-                      <p className="truncate text-xs text-gray-500">{teacher.group_name}</p>
+                      <p className="truncate text-xs text-fg-muted">{teacher.group_name}</p>
                     )}
                   </div>
                   {opening && <Spinner size={18} className="flex-shrink-0" />}

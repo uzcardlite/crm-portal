@@ -99,15 +99,15 @@ export default function PortalBooking() {
                 return (
                   <div
                     key={booking.id}
-                    className="flex items-center gap-3 border-b border-gray-50 py-3 last:border-0"
+                    className="flex items-center gap-3 border-b border-line py-3 last:border-0"
                   >
                     <div className="min-w-0 flex-1">
-                      <p className="text-sm font-medium text-gray-900">
+                      <p className="text-sm font-medium text-fg">
                         {formatDate(booking.date)}
                       </p>
-                      <p className="mt-0.5 text-xs text-gray-500">{slotRange(booking)}</p>
+                      <p className="mt-0.5 text-xs text-fg-muted">{slotRange(booking)}</p>
                       {booking.note && (
-                        <p className="mt-0.5 truncate text-xs text-gray-400">{booking.note}</p>
+                        <p className="mt-0.5 truncate text-xs text-fg-faint">{booking.note}</p>
                       )}
                     </div>
                     <div className="flex flex-shrink-0 flex-col items-end gap-1.5">
@@ -155,11 +155,11 @@ export default function PortalBooking() {
               {availableSlots.map((slot) => (
                 <div
                   key={slot.id}
-                  className="flex items-center gap-3 border-b border-gray-50 py-3 last:border-0"
+                  className="flex items-center gap-3 border-b border-line py-3 last:border-0"
                 >
                   <div className="min-w-0 flex-1">
-                    <p className="text-sm font-medium text-gray-900">{formatDate(slot.date)}</p>
-                    <p className="mt-0.5 text-xs text-gray-500">{slotRange(slot)}</p>
+                    <p className="text-sm font-medium text-fg">{formatDate(slot.date)}</p>
+                    <p className="mt-0.5 text-xs text-fg-muted">{slotRange(slot)}</p>
                   </div>
                   <Button size="sm" onClick={() => openBooking(slot)}>
                     Band qilish
@@ -189,11 +189,11 @@ export default function PortalBooking() {
         {selectedSlot && (
           <div className="flex flex-col gap-3">
             <div className="rounded-card bg-accent-light/20 px-4 py-3">
-              <p className="text-sm font-medium text-gray-900">{formatDate(selectedSlot.date)}</p>
-              <p className="mt-0.5 text-sm text-gray-600">{slotRange(selectedSlot)}</p>
+              <p className="text-sm font-medium text-fg">{formatDate(selectedSlot.date)}</p>
+              <p className="mt-0.5 text-sm text-fg-secondary">{slotRange(selectedSlot)}</p>
             </div>
             <div className="flex flex-col gap-1.5">
-              <label htmlFor="booking-note" className="text-sm font-medium text-gray-700">
+              <label htmlFor="booking-note" className="text-sm font-medium text-fg-secondary">
                 Izoh (ixtiyoriy)
               </label>
               <textarea
@@ -202,7 +202,7 @@ export default function PortalBooking() {
                 onChange={(event) => setNote(event.target.value)}
                 rows={3}
                 placeholder="Muhokama qilmoqchi bo'lgan mavzu..."
-                className="resize-none rounded-btn border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                className="resize-none rounded-btn border border-line-strong bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
               />
             </div>
           </div>

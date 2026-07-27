@@ -9,10 +9,10 @@ export default function GradeRow({ title, meta, score, maxScore }) {
   const hasMax = maxValue !== null && !Number.isNaN(maxValue) && maxValue > 0;
 
   return (
-    <div className="flex items-center gap-3 border-b border-gray-50 py-3 last:border-0">
+    <div className="flex items-center gap-3 border-b border-line py-3 last:border-0">
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-gray-900">{title}</p>
-        <p className="mt-0.5 truncate text-xs text-gray-500">{meta}</p>
+        <p className="truncate text-sm font-medium text-fg">{title}</p>
+        <p className="mt-0.5 truncate text-xs text-fg-muted">{meta}</p>
         {hasScore && hasMax && (
           <ProgressBar
             className="mt-2"
@@ -22,11 +22,11 @@ export default function GradeRow({ title, meta, score, maxScore }) {
         )}
       </div>
       {hasScore ? (
-        <span className="flex-shrink-0 text-sm font-semibold tabular-nums text-gray-900">
+        <span className="flex-shrink-0 text-sm font-semibold tabular-nums text-fg">
           {scoreValue}/{hasMax ? maxValue : "—"}
         </span>
       ) : (
-        <span className="flex-shrink-0 text-sm text-gray-400">—</span>
+        <span className="flex-shrink-0 text-sm text-fg-faint">—</span>
       )}
     </div>
   );

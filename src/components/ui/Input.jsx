@@ -9,7 +9,7 @@ export default function Input({ label, error, className, id, name, ...props }) {
   return (
     <div className="flex flex-col gap-1.5">
       {label && (
-        <label htmlFor={inputId} className="text-sm font-medium text-gray-700">
+        <label htmlFor={inputId} className="text-sm font-medium text-fg-secondary">
           {label}
         </label>
       )}
@@ -19,10 +19,10 @@ export default function Input({ label, error, className, id, name, ...props }) {
         aria-invalid={error ? true : undefined}
         aria-describedby={error ? errorId : undefined}
         className={cn(
-          "rounded-btn border px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400",
+          "rounded-btn border px-3 py-2 text-sm text-fg placeholder:text-fg-faint focus:outline-none focus:ring-2 focus:ring-accent/40 disabled:cursor-not-allowed disabled:bg-surface-sunken disabled:text-fg-faint",
           error
             ? "border-danger focus:ring-danger/30"
-            : "border-gray-300 focus:border-accent",
+            : "border-line-strong focus:border-accent",
           className,
         )}
         {...props}

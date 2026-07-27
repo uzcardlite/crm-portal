@@ -13,7 +13,7 @@ export default function PaymentRow({ date, title, amount, status = "paid" }) {
   const Icon = style.icon;
 
   return (
-    <div className="flex items-center gap-3 border-b border-gray-50 py-3 last:border-0">
+    <div className="flex items-center gap-3 border-b border-line py-3 last:border-0">
       <span
         className={cn(
           "flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-full",
@@ -23,10 +23,10 @@ export default function PaymentRow({ date, title, amount, status = "paid" }) {
         <Icon size={16} />
       </span>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm font-medium text-gray-900">{title}</p>
-        <p className="mt-0.5 text-xs text-gray-500">{formatDate(date)}</p>
+        <p className="truncate text-sm font-medium text-fg">{title}</p>
+        <p className="mt-0.5 text-xs text-fg-muted">{formatDate(date)}</p>
       </div>
-      <span className="flex-shrink-0 text-sm font-semibold tabular-nums text-gray-900">
+      <span className="flex-shrink-0 text-sm font-semibold tabular-nums text-fg">
         {formatMoney(amount)}
       </span>
     </div>

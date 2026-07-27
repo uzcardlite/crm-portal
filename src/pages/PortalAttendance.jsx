@@ -71,7 +71,7 @@ export default function PortalAttendance() {
           aria-label="Oldingi oy"
           onClick={() => shiftMonth(-1)}
         />
-        <span className="text-sm font-medium text-gray-900">{monthLabel}</span>
+        <span className="text-sm font-medium text-fg">{monthLabel}</span>
         <IconButton
           icon={ChevronRight}
           aria-label="Keyingi oy"
@@ -111,14 +111,14 @@ export default function PortalAttendance() {
                 {percent !== null ? `${percent}%` : null}
               </ProgressRing>
               <div className="flex-1 space-y-1.5">
-                <p className="text-xs text-gray-500">{monthLabel} xulosasi</p>
+                <p className="text-xs text-fg-muted">{monthLabel} xulosasi</p>
                 {Object.entries(ATTENDANCE_CELL).map(([status, cell]) => (
                   <div key={status} className="flex items-center justify-between text-xs">
-                    <span className="inline-flex items-center gap-1.5 text-gray-500">
+                    <span className="inline-flex items-center gap-1.5 text-fg-muted">
                       <span className={cn("h-3 w-3 rounded-full", cell.className)} />
                       {cell.label}
                     </span>
-                    <span className="font-semibold tabular-nums text-gray-900">
+                    <span className="font-semibold tabular-nums text-fg">
                       {counts[status]}
                     </span>
                   </div>
