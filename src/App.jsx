@@ -8,6 +8,8 @@ import PortalLogin from "./pages/PortalLogin";
 import PortalHome from "./pages/PortalHome";
 import PortalAttendance from "./pages/PortalAttendance";
 import PortalGrades from "./pages/PortalGrades";
+import PortalHomework from "./pages/PortalHomework";
+import PortalBehaviour from "./pages/PortalBehaviour";
 import PortalPayments from "./pages/PortalPayments";
 import PortalSchedule from "./pages/PortalSchedule";
 import PortalProfile from "./pages/PortalProfile";
@@ -41,6 +43,8 @@ export default function App() {
             <Route path="/" element={<PortalHome />} />
             <Route path="/attendance" element={<PortalAttendance />} />
             <Route path="/grades" element={<PortalGrades />} />
+            <Route path="/homework" element={<PortalHomework />} />
+            <Route path="/behaviour" element={<PortalBehaviour />} />
             <Route path="/payments" element={<PortalPayments />} />
             <Route path="/schedule" element={<PortalSchedule />} />
             <Route path="/chat" element={<PortalChat />} />

@@ -59,6 +59,23 @@ export function getPortalSchedule(studentId) {
     .then((res) => res.data);
 }
 
+// Read-only homework for one child, newest due-date first (server order).
+// Each item: { id, group_id, group_name, teacher_name, title, description, due_date }.
+export function getPortalHomework(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/homework`)
+    .then((res) => res.data);
+}
+
+// Read-only behaviour points for one child, newest date first (server order).
+// Each item: { id, group_name, teacher_name, points, note, date }; `points`
+// is a signed integer (e.g. +5 or -3).
+export function getPortalBehaviour(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/behaviour`)
+    .then((res) => res.data);
+}
+
 // --- menu ------------------------------------------------------------------
 
 // `range` is "today" (default) or "week"; both are keyed off the server's

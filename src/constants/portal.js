@@ -1,12 +1,14 @@
 // Portal (ota-ona/o'quvchi kabineti) konstantalari.
 import {
   Banknote,
+  BookOpen,
   CalendarClock,
   CalendarCheck,
   DoorOpen,
   GraduationCap,
   Home,
   MessageCircle,
+  Smile,
   User,
   UtensilsCrossed,
 } from "lucide-react";
@@ -62,6 +64,8 @@ export const PORTAL_TABS = [
 // tab of their own (they used to live in the removed slide-in drawer). Chat is
 // also reachable from the corner chat button, but repeated here as a tile.
 export const PORTAL_QUICK_LINKS = [
+  { to: "/homework", label: "Uy vazifasi", icon: BookOpen },
+  { to: "/behaviour", label: "Xulq-atvor", icon: Smile },
   { to: "/menu", label: "Menyu", icon: UtensilsCrossed },
   { to: "/turnstile", label: "Kirish-chiqish", icon: DoorOpen },
   { to: "/booking", label: "Konsultatsiya", icon: CalendarClock },

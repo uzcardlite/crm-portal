@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
 import { Banknote, CalendarCheck, CalendarX, GraduationCap } from "lucide-react";
 import Badge from "../components/ui/Badge";
 import Card from "../components/ui/Card";
@@ -22,7 +23,7 @@ import {
 } from "../api/portal";
 import { usePortalAuth } from "../context/PortalAuthContext";
 import { usePortalResource } from "../hooks/usePortalResource";
-import { DAY_LABELS } from "../constants/portal";
+import { DAY_LABELS, PORTAL_QUICK_LINKS } from "../constants/portal";
 import { formatDate, formatMoney, formatMonth } from "../utils/format";
 import {
   dayKeyFromDate,
@@ -153,6 +154,25 @@ export default function PortalHome() {
       >
         {students}
       </ChildSwitcher>
+
+      {/* Quick-access tiles for the sections that have no bottom tab of their
+          own (homework, behaviour, menu, turnstile, booking, chat). */}
+      <div className="grid grid-cols-3 gap-3">
+        {PORTAL_QUICK_LINKS.map(({ to, label, icon: Icon }) => (
+          <Link
+            key={to}
+            to={to}
+            className="flex flex-col items-center gap-2 rounded-card border border-line bg-surface p-3 text-center shadow-card transition-shadow hover:shadow-card-hover"
+          >
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-light/30 text-accent-dark dark:bg-accent/15 dark:text-accent">
+              <Icon size={20} />
+            </span>
+            <span className="text-[11px] font-medium leading-tight text-fg-secondary">
+              {label}
+            </span>
+          </Link>
+        ))}
+      </div>
 
       {/* Two headline numbers: attendance this month and the grade average. */}
       {summary.loading || grades.loading ? (
