@@ -1,5 +1,8 @@
 /** @type {import('tailwindcss').Config} */
 export default {
+  // Night mode is toggled by adding `.dark` to <html> (see utils/theme.js and
+  // the flash-prevention script in index.html).
+  darkMode: "class",
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
@@ -10,7 +13,24 @@ export default {
           active: "#F5A623",
           "active-text": "#412402",
         },
-        background: "#F8F9FB",
+        // Semantic, theme-aware surfaces/text — driven by the CSS variables in
+        // index.css so a single `.dark` toggle re-skins the whole app.
+        background: "rgb(var(--page-bg) / <alpha-value>)",
+        surface: {
+          DEFAULT: "rgb(var(--surface) / <alpha-value>)",
+          raised: "rgb(var(--surface-raised) / <alpha-value>)",
+          sunken: "rgb(var(--surface-sunken) / <alpha-value>)",
+        },
+        line: {
+          DEFAULT: "rgb(var(--line) / <alpha-value>)",
+          strong: "rgb(var(--line-strong) / <alpha-value>)",
+        },
+        fg: {
+          DEFAULT: "rgb(var(--fg) / <alpha-value>)",
+          secondary: "rgb(var(--fg-secondary) / <alpha-value>)",
+          muted: "rgb(var(--fg-muted) / <alpha-value>)",
+          faint: "rgb(var(--fg-faint) / <alpha-value>)",
+        },
         accent: {
           DEFAULT: "#F5A623",
           light: "#FAC775",
@@ -23,6 +43,10 @@ export default {
         danger: {
           DEFAULT: "#A32D2D",
           bg: "#FCEBEB",
+        },
+        info: {
+          DEFAULT: "#2563EB",
+          bg: "#E5EEFF",
         },
         // Per-group lesson hues (LessonCard's colored rail) — same palette as
         // crm-frontend's Schedule/portal so a group keeps its hue everywhere.
@@ -40,6 +64,13 @@ export default {
         // Softer, rounder surfaces — the "modern & soft" refresh.
         card: "16px",
         btn: "10px",
+      },
+      backgroundImage: {
+        // Girih tile: two overlapping squares (one rotated 45°) forming an
+        // eight-pointed star outline (accent #F5A623 at 6% opacity). The only
+        // place a raw hex is allowed in the design system.
+        "girih-faint":
+          "url(\"data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%3E%3Cg%20fill='none'%20stroke='%23F5A623'%20stroke-width='1'%20opacity='0.06'%3E%3Crect%20x='8'%20y='8'%20width='24'%20height='24'/%3E%3Crect%20x='8'%20y='8'%20width='24'%20height='24'%20transform='rotate(45%2020%2020)'/%3E%3C/g%3E%3C/svg%3E\")",
       },
       fontFamily: {
         sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
