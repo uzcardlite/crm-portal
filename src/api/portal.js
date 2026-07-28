@@ -76,6 +76,14 @@ export function getPortalBehaviour(studentId) {
     .then((res) => res.data);
 }
 
+// Read-only published announcements for this child's center, newest first.
+// Each item: { id, title, body, published_at, created_at }.
+export function getPortalNews(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/news`)
+    .then((res) => res.data);
+}
+
 // --- menu ------------------------------------------------------------------
 
 // `range` is "today" (default) or "week"; both are keyed off the server's

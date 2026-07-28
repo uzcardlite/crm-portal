@@ -7,6 +7,7 @@ import {
   DoorOpen,
   GraduationCap,
   Home,
+  Megaphone,
   MessageCircle,
   Smile,
   User,
@@ -66,6 +67,7 @@ export const PORTAL_TABS = [
 // tab of their own (they used to live in the removed slide-in drawer). Chat is
 // also reachable from the corner chat button, but repeated here as a tile.
 export const PORTAL_QUICK_LINKS = [
+  { to: "/news", label: "Yangiliklar", icon: Megaphone },
   { to: "/homework", label: "Uy vazifasi", icon: BookOpen },
   { to: "/behaviour", label: "Xulq-atvor", icon: Smile },
   { to: "/menu", label: "Menyu", icon: UtensilsCrossed },
