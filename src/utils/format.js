@@ -35,10 +35,21 @@ export function formatClock(value) {
   return String(value).slice(0, 5);
 }
 
-// 1250000 -> "1 250 000 so'm"
+// Group digits in threes with a dot, locale-independent: 1250000 -> "1.250.000".
+export function groupThousands(value) {
+  const n = Number(value);
+  if (!Number.isFinite(n)) return String(value ?? "");
+  const neg = n < 0;
+  const [intPart, decPart] = Math.abs(n).toString().split(".");
+  const grouped = intPart.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+  const body = decPart ? `${grouped},${decPart}` : grouped;
+  return neg ? `-${body}` : body;
+}
+
+// 1250000 -> "1.250.000 so'm"
 export function formatMoney(value) {
   if (value === null || value === undefined) return EMPTY_VALUE;
-  return `${Number(value).toLocaleString("uz-UZ")} so'm`;
+  return `${groupThousands(value)} so'm`;
 }
 
 // "2026-07" or "2026-07-01" -> "Iyul 2026"
