@@ -2,16 +2,12 @@
 import {
   Banknote,
   BookOpen,
-  CalendarClock,
   CalendarCheck,
-  DoorOpen,
   GraduationCap,
   Home,
   Megaphone,
-  MessageCircle,
   Smile,
   User,
-  UtensilsCrossed,
 } from "lucide-react";
 
 // Backend weekday keys, Monday-first (matches crm-frontend's Groups/Schedule order).
@@ -63,17 +59,13 @@ export const PORTAL_TABS = [
   { to: "/profile", label: "Profil", icon: User },
 ];
 
-// Quick-access tiles on the home page for the sections that have no bottom
-// tab of their own (they used to live in the removed slide-in drawer). Chat is
-// also reachable from the corner chat button, but repeated here as a tile.
+// Quick-access tiles on the home page — deliberately just these three
+// parent-facing sections. Chat stays reachable via the corner button; the
+// other routes still exist but are intentionally not surfaced as tiles.
 export const PORTAL_QUICK_LINKS = [
   { to: "/news", label: "Yangiliklar", icon: Megaphone },
   { to: "/homework", label: "Uy vazifasi", icon: BookOpen },
   { to: "/behaviour", label: "Xulq-atvor", icon: Smile },
-  { to: "/menu", label: "Menyu", icon: UtensilsCrossed },
-  { to: "/turnstile", label: "Kirish-chiqish", icon: DoorOpen },
-  { to: "/booking", label: "Konsultatsiya", icon: CalendarClock },
-  { to: "/chat", label: "Chat", icon: MessageCircle },
 ];
 
 // Parent-facing booking status: label + Badge variant.
