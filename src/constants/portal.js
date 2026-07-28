@@ -29,11 +29,13 @@ export const DAY_LABELS = {
 // Two-letter header for the month calendar grid (7 narrow columns).
 export const WEEKDAY_HEADER = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"];
 
+// Solid, saturated fills with white text — deep green / deep red / deep amber.
+// Reads well in BOTH light and dark (the old *-bg pastels looked washed out on
+// the dark calendar). Same className drives the day cell and the legend dot.
 export const ATTENDANCE_CELL = {
-  present: { label: "Keldi", className: "bg-success-bg text-success" },
-  absent: { label: "Kelmadi", className: "bg-danger-bg text-danger" },
-  // Same pixels as Badge variant="warning" — no new token needed.
-  late: { label: "Kechikdi", className: "bg-accent-light/40 text-accent-dark" },
+  present: { label: "Keldi", className: "bg-success text-white" },
+  absent: { label: "Kelmadi", className: "bg-danger text-white" },
+  late: { label: "Kechikdi", className: "bg-accent-dark text-white" },
 };
 
 export const ATTENDANCE_STATUS_CLASS = Object.fromEntries(
