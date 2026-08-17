@@ -3,6 +3,7 @@ import { PORTAL_TABS } from "../../constants/portal";
 import { cn } from "../../utils/cn";
 import ThemeToggle from "../ui/ThemeToggle";
 import PortalChatButton from "./PortalChatButton";
+import PortalNotificationBell from "./PortalNotificationBell";
 
 // variant="bottom" — mobile tab bar; variant="top" — md+ header nav.
 // Touch-first on purpose: no hover styles in either variant.
@@ -27,6 +28,7 @@ export default function PortalTabBar({ variant = "bottom", unreadCount = 0 }) {
             </NavLink>
           ))}
           <div className="ml-auto flex items-center gap-1.5">
+            <PortalNotificationBell />
             <ThemeToggle />
             <PortalChatButton unreadCount={unreadCount} />
           </div>

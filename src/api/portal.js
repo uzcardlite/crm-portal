@@ -119,6 +119,11 @@ export function getPortalChatThreads(studentId) {
     .then((res) => res.data);
 }
 
+// Platform announcements addressed to parents (super-admin broadcasts).
+export function getPortalAnnouncements() {
+  return portalClient.get("/api/v1/portal/announcements").then((res) => res.data);
+}
+
 export function getPortalChatMessages(threadId) {
   return portalClient
     .get(`/api/v1/portal/chat/threads/${threadId}/messages`)

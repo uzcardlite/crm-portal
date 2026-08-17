@@ -1,6 +1,7 @@
 import KoshinStar from "../ui/KoshinStar";
 import ThemeToggle from "../ui/ThemeToggle";
 import PortalChatButton from "./PortalChatButton";
+import PortalNotificationBell from "./PortalNotificationBell";
 
 // Mobile-only top bar. The brand (koshin star + wordmark) sits on the left, the
 // theme toggle and chat button on the right. Hidden on md+ where the top tab
@@ -14,6 +15,7 @@ export default function PortalAppBar({ unreadCount = 0 }) {
           <span className="text-lg font-semibold text-fg">Farzandim</span>
         </span>
         <div className="flex items-center gap-1.5">
+          <PortalNotificationBell />
           <ThemeToggle />
           <PortalChatButton unreadCount={unreadCount} />
         </div>
