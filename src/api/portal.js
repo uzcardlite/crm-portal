@@ -53,6 +53,13 @@ export function getPortalGrades(studentId) {
     .then((res) => res.data);
 }
 
+// Daily (kunlik) grades the teacher enters each lesson.
+export function getPortalDailyGrades(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/daily-grades`)
+    .then((res) => res.data);
+}
+
 export function getPortalSchedule(studentId) {
   return portalClient
     .get(`/api/v1/portal/students/${studentId}/schedule`)

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { GraduationCap } from "lucide-react";
+import { CalendarCheck, GraduationCap } from "lucide-react";
 import Card from "../components/ui/Card";
 import EmptyState from "../components/ui/EmptyState";
 import ProgressRing from "../components/ui/ProgressRing";
@@ -8,7 +8,7 @@ import GradeRow from "../components/portal/GradeRow";
 import PortalErrorState from "../components/portal/PortalErrorState";
 import PortalPageHeader from "../components/portal/PortalPageHeader";
 import SectionHeader from "../components/portal/SectionHeader";
-import { getPortalGrades } from "../api/portal";
+import { getPortalDailyGrades, getPortalGrades } from "../api/portal";
 import { usePortalAuth } from "../context/PortalAuthContext";
 import { usePortalResource } from "../hooks/usePortalResource";
 import { formatDate } from "../utils/format";
@@ -26,36 +26,39 @@ function averagePercent(rows) {
     },
     { score: 0, max: 0 },
   );
-  // No maximum means there is nothing to average against.
   if (totals.max === 0) return null;
   return Math.min(100, Math.round((totals.score / totals.max) * 100));
 }
 
 export default function PortalGrades() {
   const { activeStudentId, activeStudent } = usePortalAuth();
+  const [tab, setTab] = useState("daily");
   const [groupFilter, setGroupFilter] = useState(ALL_GROUPS);
 
-  // Group ids belong to one child; switching children invalidates the filter.
   useEffect(() => {
     setGroupFilter(ALL_GROUPS);
   }, [activeStudentId]);
 
   const enabled = Boolean(activeStudentId);
   const loadGrades = useCallback(() => getPortalGrades(activeStudentId), [activeStudentId]);
+  const loadDaily = useCallback(() => getPortalDailyGrades(activeStudentId), [activeStudentId]);
   const grades = usePortalResource(loadGrades, enabled);
+  const daily = usePortalResource(loadDaily, enabled);
 
-  // Backend order is not guaranteed — sort by date descending here.
   const sorted = useMemo(
     () => [...(grades.data ?? [])].sort((a, b) => String(b.date).localeCompare(String(a.date))),
     [grades.data],
   );
+  const dailySorted = useMemo(
+    () => [...(daily.data ?? [])].sort((a, b) => String(b.date).localeCompare(String(a.date))),
+    [daily.data],
+  );
 
-  // There is no "subject" concept in this CRM — grouping is by group name.
   const groups = useMemo(() => {
     const seen = new Map();
-    sorted.forEach((grade) => {
+    for (const grade of sorted) {
       if (!seen.has(grade.group_id)) seen.set(grade.group_id, grade.group_name);
-    });
+    }
     return [...seen.entries()].map(([id, name]) => ({ id, name }));
   }, [sorted]);
 
@@ -69,21 +72,75 @@ export default function PortalGrades() {
 
   const average = averagePercent(visible);
 
+  const tabs = [
+    { key: "daily", label: "Kunlik", icon: CalendarCheck },
+    { key: "exam", label: "Imtihon", icon: GraduationCap },
+  ];
+
+  const active = tab === "daily" ? daily : grades;
+
   return (
     <>
       <PortalPageHeader title="Baholar" subtitle={activeStudent?.full_name} />
 
-      {grades.loading ? (
-        <>
-          <Skeleton className="h-[104px] rounded-card" />
+      <div className="flex gap-2">
+        {tabs.map((item) => {
+          const Icon = item.icon;
+          const isActive = tab === item.key;
+          return (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => setTab(item.key)}
+              aria-pressed={isActive}
+              className={cn(
+                "flex flex-1 items-center justify-center gap-2 rounded-full border px-3 py-2 text-sm font-medium transition-colors",
+                isActive
+                  ? "border-accent bg-accent-light/40 text-accent-dark"
+                  : "border-line bg-surface text-fg-secondary",
+              )}
+            >
+              <Icon size={16} />
+              {item.label}
+            </button>
+          );
+        })}
+      </div>
+
+      {active.loading ? (
+        <Card padding="p-4">
+          {Array.from({ length: 6 }, (_, index) => (
+            <Skeleton key={index} className="mt-2 h-12" />
+          ))}
+        </Card>
+      ) : active.error ? (
+        <PortalErrorState onRetry={active.reload} />
+      ) : tab === "daily" ? (
+        dailySorted.length === 0 ? (
+          <EmptyState
+            size="sm"
+            icon={CalendarCheck}
+            title="Kunlik baho hali yo'q"
+            description="O'qituvchi dars kuni baho qo'ygach shu yerda ko'rinadi."
+          />
+        ) : (
           <Card padding="p-4">
-            {Array.from({ length: 6 }, (_, index) => (
-              <Skeleton key={index} className="mt-2 h-12" />
-            ))}
+            <div className="flex flex-col gap-3">
+              <SectionHeader title="Kunlik baholar" count={dailySorted.length} />
+              <div>
+                {dailySorted.map((grade, index) => (
+                  <GradeRow
+                    key={`${grade.date}-${grade.group_name}-${index}`}
+                    title={grade.group_name}
+                    meta={grade.note ? `${formatDate(grade.date)} · ${grade.note}` : formatDate(grade.date)}
+                    score={grade.score}
+                    maxScore={grade.max_score}
+                  />
+                ))}
+              </div>
+            </div>
           </Card>
-        </>
-      ) : grades.error ? (
-        <PortalErrorState onRetry={grades.reload} />
+        )
       ) : sorted.length === 0 ? (
         <EmptyState
           size="sm"
@@ -101,9 +158,7 @@ export default function PortalGrades() {
                 </ProgressRing>
                 <div className="min-w-0">
                   <p className="text-xs text-fg-muted">O'rtacha baho</p>
-                  <p className="text-xl font-semibold tabular-nums text-fg">
-                    {average}%
-                  </p>
+                  <p className="text-xl font-semibold tabular-nums text-fg">{average}%</p>
                 </div>
               </div>
             </Card>
