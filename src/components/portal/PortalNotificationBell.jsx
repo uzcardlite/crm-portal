@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
 import { getPortalAnnouncements } from "../../api/portal";
 import { cn } from "../../utils/cn";
@@ -30,15 +30,29 @@ export default function PortalNotificationBell() {
   const [seenAt, setSeenAt] = useState(getSeenAt);
   const ref = useRef(null);
 
-  useEffect(() => {
-    let alive = true;
+  const load = useCallback(() => {
     getPortalAnnouncements()
-      .then((data) => alive && setItems(Array.isArray(data) ? data : []))
+      .then((data) => setItems(Array.isArray(data) ? data : []))
       .catch(() => {});
-    return () => {
-      alive = false;
-    };
   }, []);
+
+  // The feed is read live from the server, so an announcement the super
+  // admin deletes is already gone from it. Without this the bell would keep
+  // showing the deleted one until a full page reload, and these apps stay
+  // open for hours. Refresh on a slow interval and whenever the tab comes
+  // back to the foreground.
+  useEffect(() => {
+    load();
+    const timer = setInterval(load, 120000);
+    function onVisible() {
+      if (document.visibilityState === "visible") load();
+    }
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [load]);
 
   useEffect(() => {
     if (!open) return undefined;
@@ -61,6 +75,7 @@ export default function PortalNotificationBell() {
   function toggle() {
     const next = !open;
     setOpen(next);
+    if (next) load();
     if (next && unread > 0) {
       const now = new Date().toISOString();
       localStorage.setItem(SEEN_KEY, now);
