@@ -66,6 +66,14 @@ export default function PortalAttendance() {
     [lessons, todayIso],
   );
 
+  // A lesson that has happened but carries no mark yet. Counted separately so
+  // the three status figures below plus these add up to the month's lessons —
+  // otherwise a parent sees a number missing and assumes the worst.
+  const unmarked = useMemo(
+    () => lessons.filter((lesson) => lesson.date <= todayIso && !lesson.status).length,
+    [lessons, todayIso],
+  );
+
   // Late still counts as attended — the child came to the lesson.
   const percent =
     counts.total === 0
@@ -126,6 +134,7 @@ export default function PortalAttendance() {
                 <p className="text-xs text-fg-muted">
                   {monthLabel} · {lessons.length} dars
                   {upcoming > 0 ? ` · ${upcoming} tasi oldinda` : ""}
+                  {unmarked > 0 ? ` · ${unmarked} tasi belgilanmagan` : ""}
                 </p>
                 {Object.entries(ATTENDANCE_CELL).map(([status, cell]) => (
                   <div key={status} className="flex items-center justify-between text-xs">

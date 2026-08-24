@@ -60,7 +60,9 @@ export default function LessonList({ lessons, todayIso }) {
                 label ? PILL[lesson.status] : "bg-surface-sunken text-fg-muted",
               )}
             >
-              {label || (upcoming ? "Bo'ladi" : "—")}
+              {/* A past lesson nobody has marked yet is said plainly, so a
+                  parent does not read the blank as an absence. */}
+              {label || (upcoming ? "Bo'ladi" : "Belgilanmagan")}
             </span>
           </div>
         );
