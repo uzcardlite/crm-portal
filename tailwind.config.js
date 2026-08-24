@@ -1,99 +1,99 @@
 /** @type {import('tailwindcss').Config} */
 export default {
-  // Night mode is toggled by adding `.dark` to <html> (see utils/theme.js and
-  // the flash-prevention script in index.html).
-  darkMode: "class",
+  // The parent app is night-only by design (see DIZAYN.md §1): there is no
+  // light variant, so no `.dark` class and no `dark:` variants anywhere.
   content: ["./index.html", "./src/**/*.{js,jsx}"],
   theme: {
     extend: {
       colors: {
-        sidebar: {
-          DEFAULT: "#12182B",
-          text: "#C7C9D6",
-          active: "#F5A623",
-          "active-text": "#412402",
+        // --- brand ---------------------------------------------------------
+        // Carrot earns attention: active tab, bell count, star total, the next
+        // lesson. Used everywhere it would be visible nowhere.
+        carrot: {
+          DEFAULT: "#D2712F",
+          bright: "#EC8A45",
+          deep: "#A0501C",
         },
-        // Semantic, theme-aware surfaces/text — driven by the CSS variables in
-        // index.css so a single `.dark` toggle re-skins the whole app.
-        background: "rgb(var(--page-bg) / <alpha-value>)",
+
+        // --- surfaces ------------------------------------------------------
+        bg: "#181310",
         surface: {
-          DEFAULT: "rgb(var(--surface) / <alpha-value>)",
-          raised: "rgb(var(--surface-raised) / <alpha-value>)",
-          sunken: "rgb(var(--surface-sunken) / <alpha-value>)",
+          DEFAULT: "#241C16",
+          // Raised: bottom sheets, the drawer, an unread row.
+          2: "#2C231B",
         },
-        line: {
-          DEFAULT: "rgb(var(--line) / <alpha-value>)",
-          strong: "rgb(var(--line-strong) / <alpha-value>)",
+        line: "rgba(255,255,255,.08)",
+
+        // --- text ----------------------------------------------------------
+        ink: {
+          DEFAULT: "#F4EEE7",
+          soft: "#BAAA9B",
+          faint: "#7F7466",
         },
-        fg: {
-          DEFAULT: "rgb(var(--fg) / <alpha-value>)",
-          secondary: "rgb(var(--fg-secondary) / <alpha-value>)",
-          muted: "rgb(var(--fg-muted) / <alpha-value>)",
-          faint: "rgb(var(--fg-faint) / <alpha-value>)",
-        },
-        accent: {
-          DEFAULT: "#F5A623",
-          light: "#FAC775",
-          dark: "#854F0B",
-        },
-        success: {
-          DEFAULT: "#0F6E56",
-          bg: "#E1F5EE",
-        },
-        danger: {
-          DEFAULT: "#A32D2D",
-          bg: "#FCEBEB",
-        },
-        info: {
-          DEFAULT: "#2563EB",
-          bg: "#E5EEFF",
-        },
-        // Per-group lesson hues (LessonCard's colored rail) — same palette as
-        // crm-frontend's Schedule/portal so a group keeps its hue everywhere.
-        scheduleBlock: {
-          teal: { bg: "#CCFBF1", text: "#0F766E", border: "#5EEAD4" },
-          blue: { bg: "#DBEAFE", text: "#1D4ED8", border: "#93C5FD" },
-          violet: { bg: "#EDE9FE", text: "#6D28D9", border: "#C4B5FD" },
-          rose: { bg: "#FFE4E6", text: "#BE123C", border: "#FDA4AF" },
-          amber: { bg: "#FEF3C7", text: "#92400E", border: "#FCD34D" },
-          green: { bg: "#DCFCE7", text: "#15803D", border: "#86EFAC" },
-          pink: { bg: "#FCE7F3", text: "#BE185D", border: "#F9A8D4" },
-        },
+
+        // --- state (never decoration) ---------------------------------------
+        // Carrot never carries state: "came to class" is teal, not carrot, or
+        // the parent stops being able to read colour at all.
+        teal: "#34C9A3",
+        rose: "#F5766B",
+        amber: "#E8B04B",
+        sky: "#62A8F0",
       },
+
       borderRadius: {
-        // Softer, rounder surfaces — the "modern & soft" refresh.
-        card: "16px",
-        btn: "10px",
+        card: "17px",
+        btn: "11px",
       },
-      backgroundImage: {
-        // Girih tile: two overlapping squares (one rotated 45°) forming an
-        // eight-pointed star outline (accent #F5A623 at 6% opacity). The only
-        // place a raw hex is allowed in the design system.
-        "girih-faint":
-          "url(\"data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='40'%20height='40'%20viewBox='0%200%2040%2040'%3E%3Cg%20fill='none'%20stroke='%23F5A623'%20stroke-width='1'%20opacity='0.06'%3E%3Crect%20x='8'%20y='8'%20width='24'%20height='24'/%3E%3Crect%20x='8'%20y='8'%20width='24'%20height='24'%20transform='rotate(45%2020%2020)'/%3E%3C/g%3E%3C/svg%3E\")",
-      },
+
       fontFamily: {
-        sans: ["Inter", "ui-sans-serif", "system-ui", "sans-serif"],
+        // Numbers and headings only — everything else is Jakarta.
+        display: ["Bricolage Grotesque", "ui-sans-serif", "system-ui", "sans-serif"],
+        sans: ["Plus Jakarta Sans", "ui-sans-serif", "system-ui", "sans-serif"],
       },
+
       boxShadow: {
-        // Layered, low-opacity shadows read as soft depth, not a hard edge.
-        card: "0 1px 2px 0 rgb(16 24 40 / 0.04), 0 2px 8px -2px rgb(16 24 40 / 0.08)",
-        "card-hover": "0 8px 24px -4px rgb(16 24 40 / 0.12)",
-        drawer: "0 10px 40px -8px rgb(16 24 40 / 0.35)",
+        // The app's signature. Only on the one element that must pull the eye —
+        // a card itself never glows, something inside it does.
+        glow: "0 0 18px -2px rgba(236,138,69,.55)",
+        "glow-lg": "0 0 34px -4px rgba(236,138,69,.55)",
+        "glow-sm": "0 0 8px -1px rgba(236,138,69,.55)",
+        "glow-teal": "0 0 18px -4px rgba(52,201,163,.6)",
+        "glow-rose": "0 0 10px -2px rgba(245,118,107,.7)",
+        sheet: "0 -24px 60px -12px rgba(0,0,0,.78)",
+        drawer: "26px 0 60px -18px rgba(0,0,0,.8)",
+        tabbar: "0 20px 40px -14px rgba(0,0,0,.7)",
       },
+
+      backgroundImage: {
+        // Layer 1 of every screen (DIZAYN.md §4): a 46px carrot grid at 5.5%.
+        grid: "url(\"data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='46'%20height='46'%3E%3Cpath%20d='M46%200H0v46'%20fill='none'%20stroke='%23F0A16A'%20stroke-width='1'%20opacity='0.055'/%3E%3C/svg%3E\")",
+        // Layer 2: the warm bloom that sits behind the top of every screen.
+        glow: "radial-gradient(circle, rgba(236,138,69,.36) 0%, rgba(210,113,47,.12) 46%, transparent 72%)",
+        // Carrot fill for the active tab, the send button, a pressed pill.
+        "carrot-grad": "linear-gradient(150deg, #EC8A45, #D2712F)",
+      },
+
       keyframes: {
-        "fade-in": {
-          from: { opacity: "0" },
-          to: { opacity: "1" },
+        "fade-in": { from: { opacity: "0" }, to: { opacity: "1" } },
+        // A reaction arrives the way a message does: from above, settling.
+        "drop-in": {
+          from: { opacity: "0", transform: "translateY(-14px)" },
+          to: { opacity: "1", transform: "translateY(0)" },
         },
-        "slide-in-right": {
-          from: { transform: "translateX(100%)" },
+        "sheet-up": {
+          from: { transform: "translateY(100%)" },
+          to: { transform: "translateY(0)" },
+        },
+        "drawer-in": {
+          from: { transform: "translateX(-100%)" },
           to: { transform: "translateX(0)" },
         },
       },
       animation: {
-        "fade-in": "fade-in 0.2s ease-out",
-        "slide-in-right": "slide-in-right 0.25s cubic-bezier(0.32, 0.72, 0, 1)",
+        "fade-in": "fade-in .2s ease-out",
+        "drop-in": "drop-in .28s cubic-bezier(.32,.72,0,1)",
+        "sheet-up": "sheet-up .3s cubic-bezier(.32,.72,0,1)",
+        "drawer-in": "drawer-in .28s cubic-bezier(.32,.72,0,1)",
       },
     },
   },

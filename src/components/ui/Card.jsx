@@ -1,19 +1,16 @@
 import { cn } from "../../utils/cn";
 
-export default function Card({
-  className,
-  children,
-  padding = "p-5",
-  hoverable = false,
-  ...props
-}) {
+// The one surface every block sits on. A card never glows itself — exactly one
+// element inside it may (DIZAYN.md §5).
+//
+// `padding` is the older prop, still passed by the screens that have not been
+// redesigned yet; it goes away with the last one.
+export default function Card({ padding, className, children, ...props }) {
   return (
     <div
       className={cn(
-        "rounded-card border border-line bg-surface shadow-card",
-        // Interactive cards lift softly — never `hover:shadow-md`.
-        hoverable && "transition-shadow hover:shadow-card-hover",
-        padding,
+        "rounded-card border border-line bg-surface",
+        padding || "p-[13px]",
         className,
       )}
       {...props}

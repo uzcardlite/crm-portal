@@ -1,65 +1,44 @@
 import Button from "./Button";
-import KoshinStar from "./KoshinStar";
 import { cn } from "../../utils/cn";
 
-// size="md" (default) — page-level empty state.
-// size="sm"           — compact, for an empty table body or a card slot.
-const SIZE_STYLES = {
-  sm: { wrapper: "gap-2 px-4 py-6", icon: "h-9 w-9", iconSize: 18, title: "text-sm" },
-  md: { wrapper: "gap-3 px-6 py-12", icon: "h-12 w-12", iconSize: 22, title: "text-sm" },
-};
-
+// A new student has nothing yet, so every block needs its own empty line. The
+// wording never blames the reader (DIZAYN.md §10).
+//
+// `title`/`description`/`actionLabel` are the older shape, still used by the
+// screens that have not been redesigned yet; they go away with the last one.
 export default function EmptyState({
   icon: Icon,
+  text,
   title,
   description,
   actionLabel,
   onAction,
-  action,
-  size = "md",
   className,
-  children,
 }) {
-  const styles = SIZE_STYLES[size] ?? SIZE_STYLES.md;
+  const heading = text || title;
 
   return (
-    <div
-      className={cn(
-        "relative flex flex-col items-center justify-center overflow-hidden rounded-card border border-dashed border-line-strong bg-surface text-center",
-        styles.wrapper,
-        className,
-      )}
-    >
-      {/* Faint national watermark tying every empty screen to the brand. */}
-      {size !== "sm" && (
-        <KoshinStar
-          size={132}
-          strokeWidth={4}
-          className="pointer-events-none absolute -right-10 -top-10 text-accent/[0.05] dark:text-accent/[0.1]"
-        />
-      )}
+    <div className={cn("flex flex-col items-center gap-2 py-6 text-center", className)}>
       {Icon && (
-        <span
-          className={cn(
-            "relative flex items-center justify-center rounded-full bg-accent-light/30 text-accent-dark dark:bg-accent/15 dark:text-accent",
-            styles.icon,
-          )}
-        >
-          <Icon size={styles.iconSize} />
+        <span className="grid h-9 w-9 place-items-center rounded-btn border border-line bg-black/25 text-ink-faint">
+          <Icon size={16} />
         </span>
       )}
-      <div className="relative">
-        <h3 className={cn("font-semibold text-fg", styles.title)}>{title}</h3>
-        {description && <p className="mt-1 text-sm text-fg-muted">{description}</p>}
-      </div>
-      {/* Legacy shorthand first, then the free-form slots. */}
-      {actionLabel && (
-        <Button size="sm" onClick={onAction}>
+      {heading && (
+        <p className="max-w-[24ch] text-[10.5px] font-semibold leading-relaxed text-ink-faint">
+          {heading}
+        </p>
+      )}
+      {description && (
+        <p className="max-w-[28ch] text-[10px] font-medium leading-relaxed text-ink-faint/80">
+          {description}
+        </p>
+      )}
+      {actionLabel && onAction && (
+        <Button variant="secondary" className="mt-1" onClick={onAction}>
           {actionLabel}
         </Button>
       )}
-      {action}
-      {children}
     </div>
   );
 }

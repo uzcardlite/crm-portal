@@ -3,24 +3,28 @@ import { Outlet, useLocation } from "react-router-dom";
 import { UserX } from "lucide-react";
 import Button from "../ui/Button";
 import EmptyState from "../ui/EmptyState";
-import PortalAppBar from "./PortalAppBar";
 import PortalErrorState from "./PortalErrorState";
-import PortalTabBar from "./PortalTabBar";
+import Drawer from "../layout/Drawer";
+import TabBar from "../layout/TabBar";
+import TopBar from "../layout/TopBar";
 import { getPortalChatThreads } from "../../api/portal";
 import { usePortalAuth } from "../../context/PortalAuthContext";
 
+// The frame every screen sits in: the top bar (menu · child · bell), the page
+// itself, and the floating tab bar. Nothing else is global — a screen that
+// needs a title renders its own.
 export default function PortalLayout() {
-  const { students, activeStudentId, loading, error, reloadStudents, logout } =
-    usePortalAuth();
+  const { students, loading, error, activeStudentId, reloadStudents, logout } = usePortalAuth();
   const location = useLocation();
-  const [unreadCount, setUnreadCount] = useState(0);
+  const [unreadChats, setUnreadChats] = useState(0);
+  const [menuOpen, setMenuOpen] = useState(false);
 
-  // Total unread teacher-chat messages, shown as an amber dot on the corner
-  // chat button. Fetched silently (no error toast — it is a background badge)
-  // and refreshed on every navigation so it clears after the chat is read.
+  // Unread teacher messages, shown as a dot on the Chatlar tab. Fetched
+  // silently — a background badge that fails is not worth a toast — and
+  // refreshed on navigation so it clears once the chat has been read.
   useEffect(() => {
     if (!activeStudentId) {
-      setUnreadCount(0);
+      setUnreadChats(0);
       return undefined;
     }
     let cancelled = false;
@@ -31,36 +35,40 @@ export default function PortalLayout() {
           (sum, thread) => sum + (thread.unread_count || 0),
           0,
         );
-        setUnreadCount(total);
+        setUnreadChats(total);
       })
       .catch(() => {
-        if (!cancelled) setUnreadCount(0);
+        if (!cancelled) setUnreadChats(0);
       });
     return () => {
       cancelled = true;
     };
   }, [activeStudentId, location.pathname]);
 
-  // The children list failed or is empty -> the tabs would all render the same
-  // dead end, so one explicit screen replaces the page content.
+  // The drawer is a screen of its own; closing it on navigation keeps the back
+  // button meaning "go back a page", never "close the menu I forgot was open".
+  useEffect(() => {
+    setMenuOpen(false);
+  }, [location.pathname]);
+
+  // With no children the tabs would all lead to the same dead end, so one
+  // explicit screen replaces the page content.
   let content = <Outlet />;
   if (!loading && error) {
     content = (
-      <PortalErrorState
-        size="md"
-        title="Ma'lumotni yuklab bo'lmadi"
-        description="Farzandlaringiz ro'yxatini olishda xatolik yuz berdi."
-        onRetry={reloadStudents}
-      />
+      <div className="px-4 pt-6">
+        <PortalErrorState
+          size="md"
+          title="Ma'lumotni yuklab bo'lmadi"
+          description="Farzandlaringiz ro'yxatini olishda xatolik yuz berdi."
+          onRetry={reloadStudents}
+        />
+      </div>
     );
   } else if (!loading && students.length === 0) {
     content = (
-      <div className="flex flex-col gap-4">
-        <EmptyState
-          icon={UserX}
-          title="Faol o'quvchi topilmadi"
-          description="Sizga bog'langan faol o'quvchi topilmadi, o'quv markazga murojaat qiling."
-        />
+      <div className="flex flex-col gap-4 px-4 pt-6">
+        <EmptyState icon={UserX} text="Sizga bog'langan faol o'quvchi topilmadi. O'quv markazga murojaat qiling." />
         <Button variant="secondary" className="w-full" onClick={logout}>
           Chiqish
         </Button>
@@ -69,13 +77,13 @@ export default function PortalLayout() {
   }
 
   return (
-    <div className="min-h-dvh bg-background font-sans">
-      <PortalAppBar unreadCount={unreadCount} />
-      <PortalTabBar variant="top" unreadCount={unreadCount} />
-      <main className="mx-auto w-full max-w-lg space-y-4 px-4 pb-24 pt-4 md:pb-8">
-        {content}
-      </main>
-      <PortalTabBar variant="bottom" />
+    <div className="min-h-dvh bg-bg font-sans text-ink">
+      <div className="relative mx-auto w-full max-w-lg">
+        <TopBar onMenu={() => setMenuOpen(true)} />
+        <main>{content}</main>
+      </div>
+      <TabBar unreadChats={unreadChats} />
+      <Drawer open={menuOpen} onClose={() => setMenuOpen(false)} />
     </div>
   );
 }
