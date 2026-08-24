@@ -23,9 +23,6 @@ export const DAY_LABELS = {
   sun: "Yak",
 };
 
-// Two-letter header for the month calendar grid (7 narrow columns).
-export const WEEKDAY_HEADER = ["Du", "Se", "Ch", "Pa", "Ju", "Sh", "Ya"];
-
 // Solid, saturated fills with white text — deep green / deep red / deep amber.
 // Reads well in BOTH light and dark (the old *-bg pastels looked washed out on
 // the dark calendar). Same className drives the day cell and the legend dot.
@@ -42,12 +39,6 @@ export const ATTENDANCE_STATUS_CLASS = Object.fromEntries(
 export const ATTENDANCE_LABELS = Object.fromEntries(
   Object.entries(ATTENDANCE_CELL).map(([status, cell]) => [status, cell.label]),
 );
-
-// Kalit yo'q (dars bo'lmagan / belgilanmagan kun): fon YO'Q, faqat matn rangi.
-export const ATTENDANCE_EMPTY_CLASS = "text-fg-faint";
-
-// Bugungi kun katagiga qo'shiladi (status klassi ustiga).
-export const TODAY_RING_CLASS = "ring-1 ring-accent";
 
 // This app IS the portal — no "/portal" route prefix.
 // Schedule is reachable from the home page ("Barchasi >"), not from the tab bar.

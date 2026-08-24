@@ -5,7 +5,7 @@ import EmptyState from "../components/ui/EmptyState";
 import IconButton from "../components/ui/IconButton";
 import ProgressRing from "../components/ui/ProgressRing";
 import Skeleton from "../components/ui/Skeleton";
-import AttendanceCalendar from "../components/portal/AttendanceCalendar";
+import LessonList from "../components/portal/LessonList";
 import PortalErrorState from "../components/portal/PortalErrorState";
 import PortalPageHeader from "../components/portal/PortalPageHeader";
 import { getPortalAttendance } from "../api/portal";
@@ -44,21 +44,33 @@ export default function PortalAttendance() {
   );
   const attendance = usePortalResource(loadAttendance, enabled);
 
-  const days = useMemo(() => attendance.data?.days ?? {}, [attendance.data]);
+  const lessons = useMemo(() => attendance.data?.lessons ?? [], [attendance.data]);
 
   // The summary is computed client-side from the month currently on screen, so
   // its heading names that month explicitly — it is not the home-page figure.
+  // Only lessons that already happened AND were marked count: a lesson still
+  // ahead is not an absence.
   const counts = useMemo(() => {
     const result = { present: 0, absent: 0, late: 0, total: 0 };
-    Object.values(days).forEach((status) => {
-      if (!status || !(status in result)) return;
-      result[status] += 1;
+    lessons.forEach((lesson) => {
+      if (!lesson.status || !(lesson.status in result)) return;
+      if (lesson.date > todayIso) return;
+      result[lesson.status] += 1;
       result.total += 1;
     });
     return result;
-  }, [days]);
+  }, [lessons, todayIso]);
 
-  const percent = counts.total === 0 ? null : Math.round((counts.present / counts.total) * 100);
+  const upcoming = useMemo(
+    () => lessons.filter((lesson) => lesson.date > todayIso).length,
+    [lessons, todayIso],
+  );
+
+  // Late still counts as attended — the child came to the lesson.
+  const percent =
+    counts.total === 0
+      ? null
+      : Math.round(((counts.present + counts.late) / counts.total) * 100);
   const monthLabel = `${MONTH_NAMES[cursor.month - 1]} ${cursor.year}`;
 
   return (
@@ -96,12 +108,12 @@ export default function PortalAttendance() {
         </>
       ) : attendance.error ? (
         <PortalErrorState onRetry={attendance.reload} />
-      ) : counts.total === 0 ? (
+      ) : lessons.length === 0 ? (
         <EmptyState
           size="sm"
           icon={CalendarX}
-          title="Bu oyda davomat belgilanmagan"
-          description={`${monthLabel} uchun dars qayd etilmagan.`}
+          title="Bu oyda dars yo'q"
+          description={`${monthLabel} uchun dars kuni topilmadi.`}
         />
       ) : (
         <>
@@ -111,7 +123,10 @@ export default function PortalAttendance() {
                 {percent !== null ? `${percent}%` : null}
               </ProgressRing>
               <div className="flex-1 space-y-1.5">
-                <p className="text-xs text-fg-muted">{monthLabel} xulosasi</p>
+                <p className="text-xs text-fg-muted">
+                  {monthLabel} · {lessons.length} dars
+                  {upcoming > 0 ? ` · ${upcoming} tasi oldinda` : ""}
+                </p>
                 {Object.entries(ATTENDANCE_CELL).map(([status, cell]) => (
                   <div key={status} className="flex items-center justify-between text-xs">
                     <span className="inline-flex items-center gap-1.5 text-fg-muted">
@@ -127,14 +142,7 @@ export default function PortalAttendance() {
             </div>
           </Card>
 
-          <Card padding="p-4">
-            <AttendanceCalendar
-              year={cursor.year}
-              month={cursor.month}
-              days={days}
-              todayIso={todayIso}
-            />
-          </Card>
+          <LessonList lessons={lessons} todayIso={todayIso} />
         </>
       )}
     </>
