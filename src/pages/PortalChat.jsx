@@ -131,7 +131,7 @@ export default function PortalChat() {
 
         {filter !== "teachers" && latestAnnouncement && (
           <Link
-            to="/news"
+            to="/notifications"
             className="relative flex items-center gap-2.5 overflow-hidden rounded-[15px] border border-carrot/[.28] bg-[linear-gradient(140deg,rgba(210,113,47,.22),rgba(210,113,47,.06))] px-3 py-[11px]"
           >
             <span

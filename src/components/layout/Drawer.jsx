@@ -29,7 +29,7 @@ const GROUPS = [
   {
     label: "Ilova",
     items: [
-      { to: "/notifications", icon: Bell, title: "Bildirishnomalar", note: "Qaysi xabarlar kelsin", soon: true },
+      { to: "/notifications", icon: Bell, title: "Bildirishnomalar", note: "So'nggi xabarlar" },
       { to: "/about", icon: Building2, title: "Markaz haqida", note: "Manzil, telefon, ish vaqti", soon: true },
     ],
   },
