@@ -23,14 +23,14 @@ const GROUPS = [
     items: [
       { to: "/schedule", icon: CalendarDays, title: "Dars jadvali", note: "Haftalik jadval" },
       { to: "/payments", icon: CreditCard, title: "To'lovlar", note: "Tarix va keyingi to'lov" },
-      { to: "/stars", icon: Star, title: "Yulduzchalar", note: "Qayerdan yig'ilgani", soon: true },
+      { to: "/stars", icon: Star, title: "Yulduzchalar", note: "Qayerdan yig'ilgani" },
     ],
   },
   {
     label: "Ilova",
     items: [
       { to: "/notifications", icon: Bell, title: "Bildirishnomalar", note: "So'nggi xabarlar" },
-      { to: "/about", icon: Building2, title: "Markaz haqida", note: "Manzil, telefon, ish vaqti", soon: true },
+      { to: "/about", icon: Building2, title: "Markaz haqida", note: "Aloqa va ma'lumot" },
     ],
   },
 ];
