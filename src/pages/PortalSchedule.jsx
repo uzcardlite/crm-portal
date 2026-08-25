@@ -1,161 +1,137 @@
-import { useCallback, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { ArrowLeft, CalendarX } from "lucide-react";
+import { useCallback, useMemo } from "react";
+import { CalendarX } from "lucide-react";
+import PageShell from "../components/layout/PageShell";
+import PageTitle from "../components/ui/PageTitle";
 import Card from "../components/ui/Card";
 import EmptyState from "../components/ui/EmptyState";
 import Skeleton from "../components/ui/Skeleton";
-import DayStrip from "../components/portal/DayStrip";
-import LessonCard from "../components/portal/LessonCard";
 import PortalErrorState from "../components/portal/PortalErrorState";
-import PortalPageHeader from "../components/portal/PortalPageHeader";
-import SectionHeader from "../components/portal/SectionHeader";
 import { getPortalSchedule } from "../api/portal";
 import { usePortalAuth } from "../context/PortalAuthContext";
 import { usePortalResource } from "../hooks/usePortalResource";
-import { DAY_LABELS } from "../constants/portal";
-import { formatDate } from "../utils/format";
-import {
-  dayKeyFromDate,
-  hueIndexForId,
-  lessonTimeRange,
-  lessonsForDayKey,
-  toIsoDate,
-} from "../utils/portalSchedule";
+import { cn } from "../utils/cn";
 
-// Monday-first current week.
-function currentWeekDates(today) {
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
-  return Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(monday);
-    date.setDate(monday.getDate() + index);
-    return date;
-  });
+// The week as seven rows, not seven columns: a phone reads down, and a day with
+// no lesson is worth one quiet line rather than an empty column.
+const DAYS = [
+  { key: "mon", label: "Dushanba", short: "Du" },
+  { key: "tue", label: "Seshanba", short: "Se" },
+  { key: "wed", label: "Chorshanba", short: "Ch" },
+  { key: "thu", label: "Payshanba", short: "Pa" },
+  { key: "fri", label: "Juma", short: "Ju" },
+  { key: "sat", label: "Shanba", short: "Sh" },
+  { key: "sun", label: "Yakshanba", short: "Ya" },
+];
+
+// Monday-first index of today, so the current day can be marked.
+function todayKey() {
+  return DAYS[(new Date().getDay() + 6) % 7].key;
 }
 
 export default function PortalSchedule() {
-  const { activeStudentId, activeStudent } = usePortalAuth();
-  const today = useMemo(() => new Date(), []);
-  const todayIso = toIsoDate(today);
-  const [selectedIso, setSelectedIso] = useState(todayIso);
+  const { activeStudentId } = usePortalAuth();
+  const load = useCallback(() => getPortalSchedule(activeStudentId), [activeStudentId]);
+  const schedule = usePortalResource(load, Boolean(activeStudentId));
 
-  const enabled = Boolean(activeStudentId);
-  const loadSchedule = useCallback(() => getPortalSchedule(activeStudentId), [activeStudentId]);
-  const schedule = usePortalResource(loadSchedule, enabled);
+  const byDay = useMemo(() => {
+    const map = Object.fromEntries(DAYS.map((day) => [day.key, []]));
+    (schedule.data ?? []).forEach((group) => {
+      // `sessions` carries the per-day time; a group without it falls back to
+      // its own default so an older response still lands on the right days.
+      const sessions =
+        group.sessions?.length > 0
+          ? group.sessions
+          : (group.days ?? []).map((day) => ({ day, time: group.time, duration_minutes: group.duration_minutes }));
 
-  const items = useMemo(() => schedule.data ?? [], [schedule.data]);
+      sessions.forEach((session) => {
+        if (!map[session.day]) return;
+        map[session.day].push({
+          id: `${group.group_id}-${session.day}`,
+          group_name: group.group_name,
+          teacher_name: group.teacher_name,
+          room_name: group.room_name,
+          time: session.time || group.time,
+          duration: session.duration_minutes || group.duration_minutes,
+        });
+      });
+    });
 
-  const weekDays = useMemo(
-    () =>
-      currentWeekDates(today).map((date) => {
-        const iso = toIsoDate(date);
-        const dayKey = dayKeyFromDate(date);
-        return {
-          iso,
-          weekday: DAY_LABELS[dayKey],
-          day: date.getDate(),
-          isToday: iso === todayIso,
-          hasLesson: items.some(
-            (item) => Array.isArray(item.days) && item.days.includes(dayKey),
-          ),
-        };
-      }),
-    [items, today, todayIso],
-  );
+    Object.values(map).forEach((rows) =>
+      rows.sort((a, b) => String(a.time ?? "").localeCompare(String(b.time ?? ""))),
+    );
+    return map;
+  }, [schedule.data]);
 
-  // Built from parts, not `new Date(iso)` — the string form is parsed as UTC
-  // and would name the wrong weekday/date in some timezones.
-  const selectedDate = useMemo(() => {
-    const [year, month, day] = selectedIso.split("-").map(Number);
-    return new Date(year, month - 1, day);
-  }, [selectedIso]);
-
-  const selectedLessons = useMemo(
-    () => lessonsForDayKey(items, dayKeyFromDate(selectedDate)),
-    [items, selectedDate],
-  );
-
-  // Groups the student belongs to that have no weekday set at all — they can
-  // never appear under a day, so they get their own explicit block.
-  const unscheduled = useMemo(
-    () => items.filter((item) => !Array.isArray(item.days) || item.days.length === 0),
-    [items],
-  );
+  const total = Object.values(byDay).reduce((sum, rows) => sum + rows.length, 0);
+  const today = todayKey();
 
   return (
-    <>
-      <div className="flex items-center gap-2">
-        <Link
-          to="/"
-          aria-label="Orqaga"
-          className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-btn text-fg-muted transition-colors"
-        >
-          <ArrowLeft size={16} />
-        </Link>
-        <PortalPageHeader title="Dars jadvali" subtitle={activeStudent?.full_name} />
-      </div>
+    <PageShell>
+      <PageTitle title="Dars jadvali" subtitle={total > 0 ? `Haftada ${total} dars` : null} />
 
-      {schedule.loading ? (
-        <>
-          <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1">
-            {Array.from({ length: 7 }, (_, index) => (
-              <Skeleton key={index} className="h-14 w-12 flex-shrink-0 rounded-card" />
-            ))}
-          </div>
-          <Card padding="p-4">
-            {Array.from({ length: 3 }, (_, index) => (
-              <Skeleton key={index} className="mt-3 h-16 rounded-card" />
-            ))}
+      <div className="flex flex-col gap-[13px] px-4 pb-[108px] pt-3.5">
+        {schedule.loading ? (
+          [0, 1, 2].map((index) => <Skeleton key={index} className="h-20 rounded-card" />)
+        ) : schedule.error ? (
+          <PortalErrorState size="md" title="Jadvalni yuklab bo'lmadi" onRetry={schedule.reload} />
+        ) : total === 0 ? (
+          <Card>
+            <EmptyState icon={CalendarX} text="Hali dars jadvali belgilanmagan" />
           </Card>
-        </>
-      ) : schedule.error ? (
-        <PortalErrorState onRetry={schedule.reload} />
-      ) : (
-        <>
-          <DayStrip days={weekDays} activeIso={selectedIso} onSelect={setSelectedIso} />
-
-          <Card padding="p-4">
-            <div className="flex flex-col gap-3">
-              <p className="text-sm font-semibold text-fg">{formatDate(selectedDate)}</p>
-              {selectedLessons.length === 0 ? (
-                <EmptyState size="sm" icon={CalendarX} title="Bu kuni dars yo'q" />
-              ) : (
-                selectedLessons.map((lesson) => (
-                  <LessonCard
-                    key={lesson.group_id}
-                    time={lessonTimeRange(lesson.time, lesson.duration_minutes)}
-                    groupName={lesson.group_name}
-                    teacherName={lesson.teacher_name}
-                    roomName={lesson.room_name}
-                    colorIndex={hueIndexForId(lesson.group_id)}
-                  />
-                ))
-              )}
-            </div>
-          </Card>
-
-          {unscheduled.length > 0 && (
-            <Card padding="p-4">
-              <div className="flex flex-col gap-3">
-                <SectionHeader title="Jadvalsiz guruhlar" count={unscheduled.length} />
-                <div>
-                  {unscheduled.map((item) => (
-                    <div
-                      key={item.group_id}
-                      className="border-b border-line py-3 last:border-0"
-                    >
-                      <p className="truncate text-sm font-medium text-fg">
-                        {item.group_name}
-                      </p>
-                      <p className="mt-0.5 text-xs text-fg-muted">Jadval belgilanmagan</p>
-                    </div>
-                  ))}
+        ) : (
+          DAYS.map((day) => {
+            const rows = byDay[day.key];
+            const isToday = day.key === today;
+            return (
+              <Card
+                key={day.key}
+                className={cn(isToday && "border-carrot/[.32] shadow-[0_0_22px_-12px_rgba(236,138,69,.55)]")}
+              >
+                <div className="flex items-baseline justify-between">
+                  <span className={cn("text-[11px] font-extrabold", isToday ? "text-carrot-bright" : "text-ink")}>
+                    {day.label}
+                  </span>
+                  <span className="text-[9px] font-bold uppercase tracking-[.06em] text-ink-faint">
+                    {isToday ? "Bugun" : rows.length > 0 ? `${rows.length} dars` : "Dam olish"}
+                  </span>
                 </div>
-              </div>
-            </Card>
-          )}
-        </>
-      )}
-    </>
+
+                {rows.length === 0 ? (
+                  <p className="mt-2 text-[10px] font-semibold text-ink-faint">Dars yo'q</p>
+                ) : (
+                  <div className="mt-2">
+                    {rows.map((row) => (
+                      <div
+                        key={row.id}
+                        className="flex items-center gap-2.5 border-b border-line py-2 last:border-b-0"
+                      >
+                        <span className="w-[38px] flex-none">
+                          <b className="block font-display text-[13px] font-bold leading-none tracking-tight text-ink tnum">
+                            {row.time || "—"}
+                          </b>
+                          {row.duration && (
+                            <span className="mt-0.5 block text-[7.5px] font-bold text-ink-faint">
+                              {row.duration} daq
+                            </span>
+                          )}
+                        </span>
+                        <span className="min-w-0 flex-1">
+                          <b className="block truncate text-[10.5px] font-bold text-ink">
+                            {row.group_name}
+                          </b>
+                          <span className="mt-px block truncate text-[8.5px] font-semibold text-ink-faint">
+                            {[row.teacher_name, row.room_name].filter(Boolean).join(" · ")}
+                          </span>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </Card>
+            );
+          })
+        )}
+      </div>
+    </PageShell>
   );
 }
