@@ -9,7 +9,7 @@ import {
 } from "../api/portal";
 import { usePortalAuth } from "../context/PortalAuthContext";
 import { usePortalResource } from "./usePortalResource";
-import { formatClock, formatMoney, MONTH_NAMES } from "../utils/format";
+import { formatClock, formatMoney, formatRelativeDate, MONTH_NAMES } from "../utils/format";
 
 // Everything the home screen shows, assembled from the endpoints that already
 // exist. Reactions, stars and friends have no backend yet, so they are returned
@@ -89,18 +89,61 @@ export function useHomeData() {
   ).length;
 
   // --- mastery -------------------------------------------------------------
+  const thisMonthKey = todayIso.slice(0, 7);
+  const lastMonthKey = new Date(today.getFullYear(), today.getMonth() - 1, 1)
+    .toISOString()
+    .slice(0, 7);
+
+  function averagePercent(rows) {
+    const scored = rows.filter((row) => Number(row.max_score) > 0);
+    if (scored.length === 0) return null;
+    const total = scored.reduce(
+      (sum, row) => sum + (Number(row.score) / Number(row.max_score)) * 100,
+      0,
+    );
+    return total / scored.length;
+  }
+
   const mastery = useMemo(() => {
     const gradeRows = grades.data ?? [];
     if (gradeRows.length === 0) return null;
-    const total = gradeRows.reduce((sum, row) => {
-      const max = Number(row.max_score) || 0;
-      return max > 0 ? sum + (Number(row.score) / max) * 100 : sum;
-    }, 0);
-    return { percent: Math.round(total / gradeRows.length) };
-  }, [grades.data]);
+    const percent = averagePercent(gradeRows);
+    if (percent === null) return null;
+
+    // A same-oy vs o'tgan-oy comparison, shown only when both months actually
+    // have scored marks — otherwise "+N%" would be comparing against nothing.
+    const thisMonth = averagePercent(gradeRows.filter((row) => String(row.date).slice(0, 7) === thisMonthKey));
+    const lastMonth = averagePercent(gradeRows.filter((row) => String(row.date).slice(0, 7) === lastMonthKey));
+    let note = null;
+    let tone = null;
+    if (thisMonth !== null && lastMonth !== null) {
+      const delta = Math.round(thisMonth - lastMonth);
+      if (delta !== 0) {
+        tone = delta > 0 ? "up" : "down";
+        note = `${delta > 0 ? "↑" : "↓"} o'tgan oydan ${delta > 0 ? "+" : ""}${delta}%`;
+      }
+    }
+
+    return { percent: Math.round(percent), note, tone };
+  }, [grades.data, thisMonthKey, lastMonthKey]);
 
   // --- behaviour and the teacher's latest note ------------------------------
   const behaviourRows = useMemo(() => behaviour.data ?? [], [behaviour.data]);
+  const behaviour5 = useMemo(() => {
+    if (behaviourRows.length === 0) return null;
+    const score = behaviourScore(behaviourRows);
+    // What the score would still be without this month's deductions — the
+    // difference is exactly what "bu oy −0.3" is telling the parent.
+    const before = behaviourScore(
+      behaviourRows.filter((row) => String(row.date).slice(0, 7) !== thisMonthKey),
+    );
+    const delta = Math.round((score - before) * 10) / 10;
+    return {
+      score,
+      note: delta !== 0 ? `bu oy ${delta > 0 ? "+" : ""}${delta.toFixed(1)}` : null,
+      tone: delta > 0 ? "up" : delta < 0 ? "down" : null,
+    };
+  }, [behaviourRows, thisMonthKey]);
   const latestNote = useMemo(() => {
     const withNote = behaviourRows.filter((row) => row.note);
     if (withNote.length === 0) return null;
@@ -109,7 +152,7 @@ export function useHomeData() {
       text: row.note,
       teacher_name: row.teacher_name || "Ustoz",
       group_name: row.group_name,
-      when: row.date,
+      when: formatRelativeDate(row.date),
     };
   }, [behaviourRows]);
 
@@ -188,7 +231,7 @@ export function useHomeData() {
     ranking: [],
     payment,
     mastery,
-    behaviour: behaviourRows.length > 0 ? { score: behaviourScore(behaviourRows) } : null,
+    behaviour: behaviour5,
     attendance: {
       days: thread,
       present: attended,
