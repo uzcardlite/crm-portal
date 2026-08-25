@@ -2,19 +2,20 @@ import { useCallback, useMemo } from "react";
 import {
   getPortalAttendance,
   getPortalBehaviour,
+  getPortalFriends,
   getPortalGrades,
   getPortalPayments,
+  getPortalReactions,
+  getPortalRanking,
   getPortalSchedule,
+  getPortalStars,
   getPortalTurnstile,
 } from "../api/portal";
 import { usePortalAuth } from "../context/PortalAuthContext";
 import { usePortalResource } from "./usePortalResource";
 import { formatClock, formatMoney, formatRelativeDate, MONTH_NAMES } from "../utils/format";
 
-// Everything the home screen shows, assembled from the endpoints that already
-// exist. Reactions, stars and friends have no backend yet, so they are returned
-// as empty and their blocks render their own "not yet" state — the page is
-// never half-drawn while we wait for that work.
+// Everything the home screen shows, assembled from the endpoints that exist.
 
 const WEEKDAY_SHORT = ["Ya", "Du", "Se", "Ch", "Pa", "Ju", "Sh"];
 
@@ -58,6 +59,10 @@ export function useHomeData() {
   const loadPayments = useCallback(() => getPortalPayments(activeStudentId), [activeStudentId]);
   const loadSchedule = useCallback(() => getPortalSchedule(activeStudentId), [activeStudentId]);
   const loadTurnstile = useCallback(() => getPortalTurnstile(activeStudentId), [activeStudentId]);
+  const loadReactions = useCallback(() => getPortalReactions(activeStudentId), [activeStudentId]);
+  const loadStars = useCallback(() => getPortalStars(activeStudentId), [activeStudentId]);
+  const loadFriends = useCallback(() => getPortalFriends(activeStudentId), [activeStudentId]);
+  const loadRanking = useCallback(() => getPortalRanking(activeStudentId), [activeStudentId]);
 
   const attendance = usePortalResource(loadAttendance, enabled);
   const grades = usePortalResource(loadGrades, enabled);
@@ -65,6 +70,10 @@ export function useHomeData() {
   const payments = usePortalResource(loadPayments, enabled);
   const schedule = usePortalResource(loadSchedule, enabled);
   const turnstile = usePortalResource(loadTurnstile, enabled);
+  const reactions = usePortalResource(loadReactions, enabled);
+  const stars = usePortalResource(loadStars, enabled);
+  const friends = usePortalResource(loadFriends, enabled);
+  const ranking = usePortalResource(loadRanking, enabled);
 
   // --- attendance thread ---------------------------------------------------
   const lessons = useMemo(() => attendance.data?.lessons ?? [], [attendance.data]);
@@ -183,8 +192,20 @@ export function useHomeData() {
       });
     });
 
+    (reactions.data ?? [])
+      .filter((row) => String(row.created_at).slice(0, 10) === todayIso)
+      .forEach((row) => {
+        events.push({
+          kind: "reaction",
+          title: `${row.emoji} Ustoz reaksiya bosdi`,
+          detail: row.note || `${row.teacher_name} · +${row.points} yulduzcha`,
+          time: formatClock(row.created_at),
+          at: row.created_at,
+        });
+      });
+
     return events.sort((a, b) => String(a.at).localeCompare(String(b.at)));
-  }, [turnstile.data, schedule.data, today, todayIso]);
+  }, [turnstile.data, schedule.data, reactions.data, today, todayIso]);
 
   // --- the next lesson still ahead today ------------------------------------
   const nextLesson = useMemo(() => {
@@ -218,17 +239,51 @@ export function useHomeData() {
       : { paid: true, label: `${MONTH_NAMES[today.getMonth()]} to'landi` }
     : null;
 
+  // --- friends (teacher-assigned, with the same numbers their own home
+  // screen would show — a parent judging a friendship needs more than a name) ---
+  const friendList = useMemo(
+    () =>
+      (friends.data ?? []).map((friend) => ({
+        id: friend.student_id,
+        photo_url: friend.photo_url,
+        full_name: friend.full_name,
+        group_name: friend.group_name,
+        group_short: friend.group_name,
+        in_centre: false, // not computed per-friend yet — omitted rather than guessed
+        mastery: friend.mastery_percent,
+        behaviour: friend.behaviour_score,
+        stars: friend.stars,
+        attendance: friend.attendance_percent,
+      })),
+    [friends.data],
+  );
+
+  // --- group ranking ---------------------------------------------------------
+  const rankingGroups = useMemo(
+    () =>
+      (ranking.data ?? []).map((group) => {
+        const better = group.top.find((row) => row.position === group.me.position - 1);
+        let footnote = `${group.total_students} o'quvchidan ${group.me.position}-o'rin`;
+        if (better) {
+          footnote += ` · ${better.position}-o'ringacha ${better.score - group.me.score}% qoldi`;
+        } else if (group.me.position === 1) {
+          footnote += " · guruhda birinchi!";
+        }
+        return { ...group, footnote };
+      }),
+    [ranking.data],
+  );
+
   const loading =
     attendance.loading || grades.loading || behaviour.loading || payments.loading;
 
   return {
     student: activeStudent,
     loading,
-    // Not built yet — the blocks below render their own empty state.
-    stars: 0,
-    rank: null,
-    friends: [],
-    ranking: [],
+    stars: stars.data?.total ?? 0,
+    rank: stars.data?.rank ?? null,
+    friends: friendList,
+    ranking: rankingGroups,
     payment,
     mastery,
     behaviour: behaviour5,
@@ -248,6 +303,10 @@ export function useHomeData() {
       behaviour.reload?.();
       payments.reload?.();
       turnstile.reload?.();
+      reactions.reload?.();
+      stars.reload?.();
+      friends.reload?.();
+      ranking.reload?.();
     },
   };
 }

@@ -83,6 +83,30 @@ export function getPortalBehaviour(studentId) {
     .then((res) => res.data);
 }
 
+export function getPortalReactions(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/reactions`)
+    .then((res) => res.data);
+}
+
+export function getPortalStars(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/stars`)
+    .then((res) => res.data);
+}
+
+export function getPortalFriends(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/friends`)
+    .then((res) => res.data);
+}
+
+export function getPortalRanking(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/ranking`)
+    .then((res) => res.data);
+}
+
 // Read-only published announcements for this child's center, newest first.
 // Each item: { id, title, body, published_at, created_at }.
 export function getPortalNews(studentId) {
