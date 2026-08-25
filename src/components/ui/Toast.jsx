@@ -11,15 +11,15 @@ export default function Toast() {
         duration: 4000,
         style: {
           borderRadius: "8px",
-          background: colors.sidebar.DEFAULT,
-          color: colors.sidebar.text,
+          background: colors.surface[2],
+          color: colors.ink.DEFAULT,
           fontSize: "14px",
         },
         success: {
-          iconTheme: { primary: colors.success.DEFAULT, secondary: colors.success.bg },
+          iconTheme: { primary: colors.teal, secondary: colors.surface[2] },
         },
         error: {
-          iconTheme: { primary: colors.danger.DEFAULT, secondary: colors.danger.bg },
+          iconTheme: { primary: colors.rose, secondary: colors.surface[2] },
         },
       }}
     />
