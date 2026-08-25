@@ -143,6 +143,14 @@ export function markPortalChatRead(threadId) {
     .then((res) => res.data);
 }
 
+// A parent flagging their child will miss today's lesson, attributed to
+// whichever group this thread's teacher shares with the child.
+export function createPortalAbsenceNotice(threadId, reason) {
+  return portalClient
+    .post(`/api/v1/portal/chat/threads/${threadId}/absence-notice`, { reason })
+    .then((res) => res.data);
+}
+
 // Teachers the parent can start a chat with for this child — the teachers of
 // the child's active groups. Each item: { teacher_id, teacher_name, group_id,
 // group_name }.

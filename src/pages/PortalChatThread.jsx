@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ChevronLeft, Send } from "lucide-react";
+import { ChevronLeft, ChevronRight, Send } from "lucide-react";
 import PageShell from "../components/layout/PageShell";
 import Avatar from "../components/ui/Avatar";
 import Skeleton from "../components/ui/Skeleton";
@@ -9,9 +9,11 @@ import PortalErrorState from "../components/portal/PortalErrorState";
 import { MessageCircle } from "lucide-react";
 import { toast } from "../components/ui/Toast";
 import {
+  createPortalAbsenceNotice,
   getPortalChatMessages,
   getPortalChatTeachers,
   getPortalChatThreads,
+  getPortalGrades,
   markPortalChatRead,
   sendPortalChatMessage,
 } from "../api/portal";
@@ -44,10 +46,12 @@ export default function PortalChatThread() {
   const loadMessages = useCallback(() => getPortalChatMessages(threadId), [threadId]);
   const loadThreads = useCallback(() => getPortalChatThreads(activeStudentId), [activeStudentId]);
   const loadTeachers = useCallback(() => getPortalChatTeachers(activeStudentId), [activeStudentId]);
+  const loadGrades = useCallback(() => getPortalGrades(activeStudentId), [activeStudentId]);
 
   const messages = usePortalResource(loadMessages, Boolean(threadId));
   const threads = usePortalResource(loadThreads, Boolean(activeStudentId));
   const teachers = usePortalResource(loadTeachers, Boolean(activeStudentId));
+  const grades = usePortalResource(loadGrades, Boolean(activeStudentId));
 
   const thread = (threads.data ?? []).find((row) => String(row.id) === String(threadId));
   const teacherName = useMemo(() => {
@@ -55,6 +59,18 @@ export default function PortalChatThread() {
     return (teachers.data ?? []).find((teacher) => teacher.group_name === thread.group_name)
       ?.teacher_name;
   }, [teachers.data, thread]);
+
+  // This teacher's grades for this child, one per day — so the day a mark
+  // came in shows as a card in the same conversation, not only in Baholash.
+  const gradeByDate = useMemo(() => {
+    const map = {};
+    (grades.data ?? [])
+      .filter((row) => row.group_name === thread?.group_name)
+      .forEach((row) => {
+        map[String(row.date).slice(0, 10)] = row;
+      });
+    return map;
+  }, [grades.data, thread]);
 
   // Opening the conversation is what marks it read — the parent has seen it.
   useEffect(() => {
@@ -77,6 +93,16 @@ export default function PortalChatThread() {
       })
       .catch((error) => toast.error(getErrorMessage(error, "Xabar yuborilmadi")))
       .finally(() => setSending(false));
+  }
+
+  // "Bugun kelolmaydi" is more than a sentence to the teacher — it also has to
+  // land in Davomat as a real absence notice, not just sit in this thread.
+  function sendQuick(text) {
+    send(text);
+    if (text !== "Bugun kelolmaydi") return;
+    createPortalAbsenceNotice(threadId, text)
+      .then(() => toast.success("Davomat bo'limiga ham yozib qo'yildi"))
+      .catch((error) => toast.error(getErrorMessage(error, "Sababni yozib bo'lmadi")));
   }
 
   const rows = messages.data ?? [];
@@ -119,9 +145,9 @@ export default function PortalChatThread() {
           rows.map((message, index) => {
             const mine = message.sender_type === "parent";
             const previous = rows[index - 1];
-            const newDay =
-              !previous ||
-              String(previous.created_at).slice(0, 10) !== String(message.created_at).slice(0, 10);
+            const dateKey = String(message.created_at).slice(0, 10);
+            const newDay = !previous || String(previous.created_at).slice(0, 10) !== dateKey;
+            const dayGrade = newDay ? gradeByDate[dateKey] : null;
 
             return (
               <div key={message.id} className="contents">
@@ -129,6 +155,25 @@ export default function PortalChatThread() {
                   <span className="self-center rounded-full border border-line bg-black/[.28] px-2.5 py-[3px] text-[8.5px] font-bold text-ink-faint">
                     {dayLabel(message.created_at)}
                   </span>
+                )}
+                {dayGrade && (
+                  <Link
+                    to="/grades"
+                    className="flex items-center gap-2.5 self-start rounded-[15px] border border-carrot/[.28] bg-[linear-gradient(140deg,rgba(210,113,47,.18),rgba(210,113,47,.05))] px-[11px] py-2.5"
+                  >
+                    <span className="grid h-[30px] w-[30px] flex-none place-items-center rounded-[10px] bg-carrot/[.2] font-display text-[12px] font-bold tracking-tight text-carrot-bright tnum">
+                      {dayGrade.score}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <b className="block truncate text-[10px] font-bold text-ink">
+                        {dayGrade.exam_name}
+                      </b>
+                      <span className="mt-px block truncate text-[8.5px] font-semibold text-ink-faint">
+                        {dayGrade.group_name} · {dayGrade.score}/{dayGrade.max_score}
+                      </span>
+                    </span>
+                    <ChevronRight size={12} strokeWidth={2.4} className="flex-none text-ink-faint" />
+                  </Link>
                 )}
                 <div
                   className={cn(
@@ -156,7 +201,7 @@ export default function PortalChatThread() {
             <button
               key={text}
               type="button"
-              onClick={() => send(text)}
+              onClick={() => sendQuick(text)}
               disabled={sending}
               className="rounded-full border border-carrot/[.28] bg-carrot/[.13] px-2.5 py-[5px] text-[9px] font-bold text-carrot-bright disabled:opacity-50"
             >

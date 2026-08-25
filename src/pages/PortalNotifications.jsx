@@ -1,10 +1,11 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Bell, Check, GraduationCap, Megaphone, UserCheck } from "lucide-react";
 import PageShell from "../components/layout/PageShell";
 import PageTitle from "../components/ui/PageTitle";
 import Card from "../components/ui/Card";
 import EmptyState from "../components/ui/EmptyState";
 import Skeleton from "../components/ui/Skeleton";
+import { cn } from "../utils/cn";
 import { getPortalAnnouncements, getPortalSummary } from "../api/portal";
 import { usePortalAuth } from "../context/PortalAuthContext";
 import { usePortalResource } from "../hooks/usePortalResource";
@@ -19,6 +20,28 @@ const ICON = {
   payment: { Icon: Check, tone: "bg-teal/15 text-teal" },
   grade: { Icon: GraduationCap, tone: "bg-sky/15 text-sky" },
 };
+
+const KINDS = [
+  { key: "announcement", label: "E'lonlar" },
+  { key: "attendance", label: "Davomat" },
+  { key: "payment", label: "To'lov" },
+  { key: "grade", label: "Baholar" },
+];
+
+const STORAGE_KEY = "portal.notifications.hiddenKinds";
+
+// Which kinds a parent wants to see, remembered on this device only — there is
+// no server-side preference yet, so a phone changes what it shows, not what
+// the centre sends.
+function loadHidden() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return new Set(Array.isArray(parsed) ? parsed : []);
+  } catch {
+    return new Set();
+  }
+}
 
 function when(value) {
   if (!value) return "";
@@ -45,6 +68,21 @@ function dayOf(value) {
 export default function PortalNotifications() {
   const { activeStudentId } = usePortalAuth();
   const enabled = Boolean(activeStudentId);
+  const [hidden, setHidden] = useState(loadHidden);
+
+  function toggleKind(key) {
+    setHidden((current) => {
+      const next = new Set(current);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify([...next]));
+      } catch {
+        // Private mode or a full quota — the toggle still works this visit.
+      }
+      return next;
+    });
+  }
 
   const loadSummary = useCallback(() => getPortalSummary(activeStudentId), [activeStudentId]);
   const loadAnnouncements = useCallback(() => getPortalAnnouncements(), []);
@@ -52,7 +90,7 @@ export default function PortalNotifications() {
   const summary = usePortalResource(loadSummary, enabled);
   const announcements = usePortalResource(loadAnnouncements, enabled);
 
-  const rows = useMemo(() => {
+  const allRows = useMemo(() => {
     const items = [];
 
     (announcements.data ?? []).forEach((item) => {
@@ -78,6 +116,11 @@ export default function PortalNotifications() {
     return items.sort((a, b) => String(b.at).localeCompare(String(a.at)));
   }, [announcements.data, summary.data]);
 
+  const rows = useMemo(
+    () => allRows.filter((row) => !hidden.has(row.kind)),
+    [allRows, hidden],
+  );
+
   const loading = summary.loading || announcements.loading;
 
   // Consecutive rows from the same day share one heading.
@@ -88,11 +131,40 @@ export default function PortalNotifications() {
       <PageTitle title="Bildirishnomalar" subtitle={rows.length > 0 ? `${rows.length} ta xabar` : null} />
 
       <div className="flex flex-col gap-[9px] px-4 pb-[108px] pt-3.5">
+        <div className="flex flex-wrap gap-1.5">
+          {KINDS.map((kind) => {
+            const on = !hidden.has(kind.key);
+            return (
+              <button
+                key={kind.key}
+                type="button"
+                onClick={() => toggleKind(kind.key)}
+                aria-pressed={on}
+                className={cn(
+                  "rounded-full border px-2.5 py-1 text-[9.5px] font-bold transition-colors",
+                  on
+                    ? "border-carrot/30 bg-carrot/[.14] text-carrot-bright"
+                    : "border-line bg-surface text-ink-faint",
+                )}
+              >
+                {kind.label}
+              </button>
+            );
+          })}
+        </div>
+
         {loading ? (
           [0, 1, 2, 3].map((index) => <Skeleton key={index} className="h-[58px] rounded-[15px]" />)
         ) : rows.length === 0 ? (
           <Card>
-            <EmptyState icon={Bell} text="Hali bildirishnoma yo'q" />
+            <EmptyState
+              icon={Bell}
+              text={
+                allRows.length > 0
+                  ? "Tanlangan turlarda xabar yo'q — yuqoridan ko'proq tur yoqing"
+                  : "Hali bildirishnoma yo'q"
+              }
+            />
           </Card>
         ) : (
           rows.map((row) => {
