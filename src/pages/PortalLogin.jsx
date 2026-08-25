@@ -1,23 +1,19 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Navigate, useLocation, useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import Button from "../components/ui/Button";
-import Card from "../components/ui/Card";
-import IconButton from "../components/ui/IconButton";
-import Input from "../components/ui/Input";
-import Spinner from "../components/ui/Spinner";
 import { toast } from "../components/ui/Toast";
 import { requestPortalCode, verifyPortalCode } from "../api/portal";
 import { usePortalAuth } from "../context/PortalAuthContext";
 import { getErrorMessage } from "../utils/apiError";
 import { PHONE_PREFIX, normalizePhoneValue } from "../utils/phone";
+import { cn } from "../utils/cn";
 
 const CODE_LENGTH = 6;
 const RESEND_SECONDS = 60;
 
 // Label + input + one line of error text — the height is reserved up front so
 // showing a validation message never shifts the button.
-const FIELD_SLOT_CLASS = "min-h-[86px]";
+const FIELD_SLOT_CLASS = "min-h-[70px]";
 
 const NOT_REGISTERED_MESSAGE =
   "Siz hali ro'yxatdan o'tmagansiz — Telegram bot orqali ro'yxatdan o'ting";
@@ -142,58 +138,78 @@ export default function PortalLogin() {
   // parent never sees it flash before landing on the dashboard.
   if (loading) {
     return (
-      <div className="flex min-h-dvh items-center justify-center bg-background">
-        <Spinner size={32} />
+      <div className="relative flex min-h-dvh items-center justify-center bg-bg">
+        <span aria-hidden="true" className="layer-grid" />
+        <span aria-hidden="true" className="layer-glow" />
+        <span className="relative h-8 w-8 animate-spin rounded-full border-2 border-white/15 border-t-carrot-bright" />
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-dvh items-center justify-center bg-background px-4">
-      <div className="w-full max-w-sm">
-        <div className="mb-6 flex flex-col items-center gap-2 text-center">
-          <span className="flex h-14 w-14 items-center justify-center overflow-hidden rounded-card">
-            <img src="/logo.svg" alt="Logo" className="h-full w-full object-cover" />
+    <div className="relative flex min-h-dvh items-center justify-center bg-bg px-5">
+      <span aria-hidden="true" className="layer-grid" />
+      <span aria-hidden="true" className="layer-glow" />
+
+      <div className="relative z-[5] w-full max-w-[340px]">
+        <div className="mb-7 flex flex-col items-center gap-2 text-center">
+          <span className="grid h-[62px] w-[62px] place-items-center rounded-full border border-carrot/[.4]">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path d="M12 3l8 4v5c0 5-3.4 8.4-8 9.5C7.4 20.4 4 17 4 12V7l8-4z" stroke="#D79A3C" strokeWidth="1.4" />
+              <path d="M9 12.3l2 2 4-4.3" stroke="#D79A3C" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" fill="none" />
+            </svg>
           </span>
-          <h1 className="text-xl font-semibold text-fg">Ota-ona kabineti</h1>
-          <p className="text-sm text-fg-muted">
-            Farzandingiz davomati, baholari va to'lovlari
+          <h1 className="font-display text-[22px] font-bold italic tracking-tight text-ink">
+            Farzandim
+          </h1>
+          <p className="max-w-[26ch] text-[11px] font-semibold leading-relaxed text-ink-faint">
+            Farzandingiz davomati, baholari va to'lovlari — bitta joyda
           </p>
         </div>
 
-        <Card padding="p-6">
+        <div className="rounded-card border border-line bg-surface p-5">
           {step === "phone" ? (
-            <form onSubmit={handlePhoneSubmit} className="flex flex-col gap-2" noValidate>
+            <form onSubmit={handlePhoneSubmit} className="flex flex-col gap-3" noValidate>
               <div className={FIELD_SLOT_CLASS}>
-                <Input
-                  label="Telefon raqami"
+                <label htmlFor="phone" className="mb-1.5 block text-[10px] font-bold uppercase tracking-[.06em] text-ink-faint">
+                  Telefon raqami
+                </label>
+                <input
+                  id="phone"
                   name="phone"
                   type="tel"
                   inputMode="tel"
                   placeholder="+998901234567"
                   value={phone}
                   onChange={(event) => setPhone(normalizePhoneValue(event.target.value))}
-                  error={errors.phone}
                   autoComplete="tel"
                   autoFocus
+                  aria-invalid={errors.phone ? true : undefined}
+                  className={cn(
+                    "w-full rounded-btn border bg-black/[.24] px-3.5 py-3 text-[13px] font-semibold text-ink outline-none placeholder:text-ink-faint",
+                    errors.phone ? "border-rose" : "border-line focus:border-carrot/50",
+                  )}
                 />
+                {errors.phone && <p className="mt-1.5 text-[10px] font-semibold text-rose">{errors.phone}</p>}
               </div>
+
               {/* The cooldown from a previous send is still running when the
                   user steps back to edit the phone — sending again would only
                   come back as a 429. */}
-              <Button
+              <button
                 type="submit"
-                size="lg"
-                className="w-full"
                 disabled={submitting || countingDown}
+                className="flex w-full items-center justify-center gap-2 rounded-btn bg-carrot-grad py-3 text-[12.5px] font-extrabold text-[#2A1206] shadow-glow transition-opacity disabled:opacity-50"
               >
-                {submitting && <Spinner size={16} />}
+                {submitting && (
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#2A1206]/30 border-t-[#2A1206]" />
+                )}
                 {submitting
                   ? "Yuborilmoqda..."
                   : countingDown
                     ? `Qayta yuborish ${formatCountdown(cooldown)}`
                     : "Kod olish"}
-              </Button>
+              </button>
             </form>
           ) : (
             <form
@@ -201,12 +217,12 @@ export default function PortalLogin() {
                 event.preventDefault();
                 if (code.length === CODE_LENGTH) submitCode(code);
               }}
-              className="flex flex-col gap-2"
+              className="flex flex-col gap-3"
               noValidate
             >
-              <div className="mb-4 flex items-center gap-2">
-                <IconButton
-                  icon={ArrowLeft}
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
                   aria-label="Raqamni o'zgartirish"
                   onClick={() => {
                     // The resend countdown deliberately keeps running.
@@ -214,11 +230,14 @@ export default function PortalLogin() {
                     setCode("");
                     setErrors({});
                   }}
-                />
-                <span className="text-sm text-fg-muted">{phone}</span>
+                  className="grid h-7 w-7 flex-none place-items-center rounded-btn border border-line bg-black/[.24] text-ink-soft"
+                >
+                  <ArrowLeft size={13} strokeWidth={2.4} />
+                </button>
+                <span className="text-[11px] font-bold text-ink-soft tnum">{phone}</span>
               </div>
 
-              <p className="text-sm text-fg-secondary">
+              <p className="text-[11px] font-semibold text-ink-soft">
                 Telegramga yuborilgan 6 xonali kodni kiriting
               </p>
 
@@ -235,23 +254,27 @@ export default function PortalLogin() {
                   autoFocus
                   aria-label="Tasdiqlash kodi"
                   aria-invalid={errors.code ? true : undefined}
-                  className="w-full rounded-btn border border-line-strong px-3 py-3 text-center text-2xl tracking-[0.4em] text-fg focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
+                  className={cn(
+                    "w-full rounded-btn border bg-black/[.24] px-3 py-3 text-center font-display text-[22px] font-bold tracking-[0.35em] text-ink outline-none",
+                    errors.code ? "border-rose" : "border-line focus:border-carrot/50",
+                  )}
                 />
-                {errors.code && <p className="mt-1.5 text-xs text-danger">{errors.code}</p>}
+                {errors.code && <p className="mt-1.5 text-[10px] font-semibold text-rose">{errors.code}</p>}
               </div>
 
-              <Button
+              <button
                 type="submit"
-                size="lg"
-                className="w-full"
                 disabled={submitting || code.length < CODE_LENGTH}
+                className="flex w-full items-center justify-center gap-2 rounded-btn bg-carrot-grad py-3 text-[12.5px] font-extrabold text-[#2A1206] shadow-glow transition-opacity disabled:opacity-50"
               >
-                {submitting && <Spinner size={16} />}
+                {submitting && (
+                  <span className="h-3.5 w-3.5 animate-spin rounded-full border-2 border-[#2A1206]/30 border-t-[#2A1206]" />
+                )}
                 {submitting ? "Tekshirilmoqda..." : "Kirish"}
-              </Button>
+              </button>
 
               {cooldown > 0 ? (
-                <p className="mt-3 w-full text-center text-sm text-fg-faint">
+                <p className="text-center text-[10.5px] font-semibold text-ink-faint">
                   Qayta yuborish {formatCountdown(cooldown)} dan keyin
                 </p>
               ) : (
@@ -259,17 +282,17 @@ export default function PortalLogin() {
                   type="button"
                   disabled={submitting}
                   onClick={() => sendCode(phone.trim())}
-                  className="mt-3 w-full text-center text-sm font-medium text-accent-dark transition-colors disabled:opacity-50 dark:text-accent"
+                  className="text-center text-[10.5px] font-bold text-carrot-bright transition-opacity disabled:opacity-50"
                 >
                   Kodni qayta yuborish
                 </button>
               )}
             </form>
           )}
-        </Card>
+        </div>
 
         {step === "phone" && (
-          <p className="mt-3 text-center text-xs text-fg-muted">
+          <p className="mt-3 text-center text-[9.5px] font-semibold text-ink-faint">
             Tasdiqlash kodi Telegram bot orqali yuboriladi.
           </p>
         )}
