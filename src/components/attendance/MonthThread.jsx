@@ -7,16 +7,18 @@ import { cn } from "../../utils/cn";
 // The same thread the home screen shows, with the month it belongs to made
 // steerable — a parent asking "and last month?" has somewhere to press.
 const NODE = {
-  present: "bg-carrot-bright shadow-glow-sm",
+  present: "bg-teal shadow-[0_0_8px_-1px_rgba(52,201,163,.8)]",
   late: "bg-surface border-2 border-amber",
   absent: "bg-surface border-2 border-rose",
   upcoming: "bg-transparent border-[1.5px] border-dashed border-white/[.22]",
 };
 
+// Always a solid line — a break in the thread would read as "something went
+// wrong here" when the truth is just "nothing happened here yet".
 function connectorFor(status) {
-  if (status === "absent") return "border-t-2 border-dotted border-rose/50";
-  if (status === "upcoming") return "border-t-2 border-dotted border-white/[.15]";
-  return "h-0.5 bg-carrot-bright/45";
+  if (status === "absent") return "h-0.5 bg-rose/40";
+  if (status === "upcoming") return "h-0.5 bg-white/[.14]";
+  return "h-0.5 bg-teal/45";
 }
 
 function Legend({ className, children }) {
@@ -85,7 +87,7 @@ export default function MonthThread({ days = [], monthLabel, canGoForward, onBac
           </div>
 
           <div className="mt-[11px] flex flex-wrap gap-[11px] border-t border-line pt-2.5">
-            <Legend className="bg-carrot-bright">Keldi</Legend>
+            <Legend className="bg-teal">Keldi</Legend>
             <Legend className="border-2 border-amber">Kechikdi</Legend>
             <Legend className="border-2 border-rose">Kelmadi</Legend>
             <Legend className="border-[1.5px] border-dashed border-white/30">Oldinda</Legend>

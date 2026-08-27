@@ -19,19 +19,19 @@ function Row({ position, name, score, me }) {
     <div
       className={cn(
         "flex items-center gap-[9px] rounded-[12px] border px-[9px] py-[7px]",
-        me ? "border-carrot/[.34] bg-carrot/[.13] shadow-[0_0_18px_-8px_rgba(236,138,69,.55)]" : "border-transparent bg-black/[.22]",
+        me ? "border-teal/[.34] bg-teal/[.13] shadow-[0_0_18px_-8px_rgba(52,201,163,.55)]" : "border-transparent bg-black/[.22]",
       )}
     >
       <span
         className={cn(
           "grid h-5 w-5 flex-none place-items-center rounded-[7px] text-[9.5px] font-extrabold",
-          MEDAL[position] || (me ? "bg-carrot/[.22] text-carrot-bright" : "bg-white/[.06] text-ink-faint"),
+          MEDAL[position] || (me ? "bg-teal/[.22] text-teal" : "bg-white/[.06] text-ink-faint"),
         )}
       >
         {position}
       </span>
       <Avatar size="sm" />
-      <span className={cn("min-w-0 flex-1 truncate text-[10.5px] font-bold", me ? "text-carrot-bright" : "text-ink")}>
+      <span className={cn("min-w-0 flex-1 truncate text-[10.5px] font-bold", me ? "text-teal" : "text-ink")}>
         {name}
       </span>
       <span className="flex-none font-display text-[12px] font-bold tracking-tight text-ink tnum">
@@ -83,17 +83,23 @@ export default function GroupRanking({ groups = [] }) {
       )}
 
       <div className="mt-2.5 flex flex-col gap-1.5">
-        {group.top.map((student) => (
-          <Row
-            key={student.student_id}
-            position={student.position}
-            name={student.full_name}
-            score={student.score}
-          />
-        ))}
-        {/* The child's own row is always shown, even when already in the top
-            three — the parent should never have to hunt for it. */}
-        <Row position={group.me.position} name="Sizning farzandingiz" score={group.me.score} me />
+        {group.top.map((student) => {
+          const isMe = student.student_id === group.me.student_id;
+          return (
+            <Row
+              key={student.student_id}
+              position={student.position}
+              name={isMe ? "Sizning farzandingiz" : student.full_name}
+              score={student.score}
+              me={isMe}
+            />
+          );
+        })}
+        {/* Only append the child's own row when they are NOT already one of
+            the three above — otherwise they'd show up twice. */}
+        {!group.top.some((student) => student.student_id === group.me.student_id) && (
+          <Row position={group.me.position} name="Sizning farzandingiz" score={group.me.score} me />
+        )}
       </div>
 
       {group.footnote && (

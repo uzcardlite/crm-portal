@@ -6,6 +6,7 @@ import {
   CalendarDays,
   ChevronRight,
   CreditCard,
+  Download,
   LogOut,
   Pencil,
   Star,
@@ -31,12 +32,18 @@ const GROUPS = [
     items: [
       { to: "/notifications", icon: Bell, title: "Bildirishnomalar", note: "Qaysi xabarlar ko'rinsin" },
       { to: "/about", icon: Building2, title: "Markaz haqida", note: "Aloqa va ma'lumot" },
+      { href: "/farzandim.apk", icon: Download, title: "Ilovani yuklab olish", note: "Android uchun APK" },
     ],
   },
 ];
 
 export default function Drawer({ open, onClose }) {
-  const { students, activeStudentId, phone, selectStudent, logout } = usePortalAuth();
+  const { students, activeStudentId, activeStudent, phone, selectStudent, logout } = usePortalAuth();
+  // Any child's record names the same parent this phone belongs to — the
+  // first one with a name wins, so a name set on child #2 still shows even
+  // if it's missing on child #1.
+  const parentName =
+    activeStudent?.parent_name || students.find((student) => student.parent_name)?.parent_name;
 
   useEffect(() => {
     if (!open) return undefined;
@@ -70,7 +77,7 @@ export default function Drawer({ open, onClose }) {
           <Avatar size="lg" glow />
           <span className="min-w-0 flex-1">
             <b className="block truncate font-display text-[16.5px] font-bold tracking-tight text-ink">
-              Ota-ona
+              {parentName || "Ota-ona"}
             </b>
             {phone && <span className="mt-0.5 block text-[11px] font-semibold text-ink-faint">{phone}</span>}
           </span>
@@ -118,7 +125,7 @@ export default function Drawer({ open, onClose }) {
               <p className="px-1 pb-2 pt-3.5 text-[10px] font-bold uppercase tracking-[.09em] text-ink-faint">
                 {group.label}
               </p>
-              {group.items.map(({ to, icon: Icon, title, note, soon }) => {
+              {group.items.map(({ to, href, icon: Icon, title, note, soon }) => {
                 const row = (
                   <>
                     <span className="grid h-10 w-10 flex-none place-items-center rounded-btn border border-line bg-black/[.28] text-ink-soft">
@@ -142,11 +149,30 @@ export default function Drawer({ open, onClose }) {
 
                 // A screen that does not exist yet is shown but not linked —
                 // tapping through to a redirect would read as a broken app.
-                return soon ? (
-                  <div key={to} className="flex items-center gap-3 rounded-[13px] p-3 opacity-55">
-                    {row}
-                  </div>
-                ) : (
+                if (soon) {
+                  return (
+                    <div key={to || href} className="flex items-center gap-3 rounded-[13px] p-3 opacity-55">
+                      {row}
+                    </div>
+                  );
+                }
+
+                // The APK is a real file, not an in-app route — a plain
+                // download link, not a router Link.
+                if (href) {
+                  return (
+                    <a
+                      key={href}
+                      href={href}
+                      download
+                      className="flex items-center gap-3 rounded-[13px] p-3 transition-colors hover:bg-white/[.04]"
+                    >
+                      {row}
+                    </a>
+                  );
+                }
+
+                return (
                   <Link
                     key={to}
                     to={to}

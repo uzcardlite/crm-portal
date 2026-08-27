@@ -19,6 +19,10 @@ export default function PortalLayout() {
   const [unreadChats, setUnreadChats] = useState(0);
   const [menuOpen, setMenuOpen] = useState(false);
 
+  // One open conversation needs the whole bottom edge for its own compose
+  // bar — the tab bar used to float in the exact same spot and hide it.
+  const hideTabBar = /^\/chat\/[^/]+$/.test(location.pathname);
+
   // Unread teacher messages, shown as a dot on the Chatlar tab. Fetched
   // silently — a background badge that fails is not worth a toast — and
   // refreshed on navigation so it clears once the chat has been read.
@@ -82,7 +86,7 @@ export default function PortalLayout() {
         <TopBar onMenu={() => setMenuOpen(true)} />
         <main>{content}</main>
       </div>
-      <TabBar unreadChats={unreadChats} />
+      {!hideTabBar && <TabBar unreadChats={unreadChats} />}
       <Drawer open={menuOpen} onClose={() => setMenuOpen(false)} />
     </div>
   );

@@ -75,7 +75,7 @@ export default function AttendanceThread({ days = [], present, total, streak }) 
       </div>
 
       <div className="mt-3 flex flex-wrap gap-3 border-t border-line pt-2.5">
-        <Legend className="bg-carrot-bright">Keldi</Legend>
+        <Legend className="bg-teal">Keldi</Legend>
         <Legend className="border-2 border-amber">Kechikdi</Legend>
         <Legend className="border-2 border-rose">Kelmadi</Legend>
         <Legend className="border-[1.5px] border-dashed border-white/30">Oldinda</Legend>

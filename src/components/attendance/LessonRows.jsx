@@ -11,7 +11,7 @@ const WEEKDAY = {
 };
 
 function statusOf(lesson) {
-  if (lesson.status === "present") return { tone: "bg-carrot/15 text-carrot-bright", label: "Keldi" };
+  if (lesson.status === "present") return { tone: "bg-teal/15 text-teal", label: "Keldi" };
   if (lesson.status === "late") {
     return {
       tone: "bg-amber/15 text-amber",
