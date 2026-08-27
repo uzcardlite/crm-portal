@@ -1,4 +1,4 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   getPortalAttendance,
   getPortalBehaviour,
@@ -207,21 +207,72 @@ export function useHomeData() {
     return events.sort((a, b) => String(a.at).localeCompare(String(b.at)));
   }, [turnstile.data, schedule.data, reactions.data, today, todayIso]);
 
-  // --- today's reaction badge (for the avatar) ------------------------------
-  // reaction_crud.get_for_student already orders newest-first, so the first
-  // row still standing after the "today" filter is the latest one.
-  const todayReaction = useMemo(() => {
-    const row = (reactions.data ?? []).find(
-      (item) => String(item.created_at).slice(0, 10) === todayIso,
-    );
-    if (!row) return null;
-    return {
-      emoji: row.emoji,
-      teacher_name: row.teacher_name,
-      points: row.points,
-      note: row.note,
+  // --- today's reaction badges (scattered around the avatar) ---------------
+  // reaction_crud.get_for_student already orders newest-first.
+  const todayReactions = useMemo(
+    () =>
+      (reactions.data ?? [])
+        .filter((row) => String(row.created_at).slice(0, 10) === todayIso)
+        .map((row) => ({
+          id: row.id,
+          emoji: row.emoji,
+          teacher_name: row.teacher_name,
+          points: row.points,
+          note: row.note,
+          created_at: row.created_at,
+        })),
+    [reactions.data, todayIso],
+  );
+
+  // --- live "a reaction just landed" banner ---------------------------------
+  // Reactions aren't pushed, so we poll gently and diff against what this tab
+  // has already shown — the first load seeds the seen-set silently (nothing
+  // from before opening the app should announce itself), only a row that
+  // shows up afterwards triggers the banner.
+  const [alertReaction, setAlertReaction] = useState(null);
+  const seenReactionIds = useRef(null);
+
+  // A different child means a different reaction history — reseed silently
+  // instead of comparing against the previous child's ids.
+  useEffect(() => {
+    seenReactionIds.current = null;
+    setAlertReaction(null);
+  }, [activeStudentId]);
+
+  useEffect(() => {
+    if (reactions.data == null) return;
+    const rows = reactions.data;
+    if (seenReactionIds.current === null) {
+      seenReactionIds.current = new Set(rows.map((row) => row.id));
+      return;
+    }
+    const fresh = rows.find((row) => !seenReactionIds.current.has(row.id));
+    rows.forEach((row) => seenReactionIds.current.add(row.id));
+    if (fresh) {
+      setAlertReaction({
+        id: fresh.id,
+        emoji: fresh.emoji,
+        teacher_name: fresh.teacher_name,
+        note: fresh.note,
+      });
+    }
+  }, [reactions.data]);
+
+  useEffect(() => {
+    if (!enabled) return undefined;
+    const timer = setInterval(() => reactions.reload(), 20000);
+    function onVisible() {
+      if (document.visibilityState === "visible") reactions.reload();
+    }
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisible);
     };
-  }, [reactions.data, todayIso]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, activeStudentId]);
+
+  const dismissAlert = useCallback(() => setAlertReaction(null), []);
 
   // --- the next lesson still ahead today ------------------------------------
   const nextLesson = useMemo(() => {
@@ -310,7 +361,9 @@ export function useHomeData() {
       streak: currentStreak(lessons, todayIso),
     },
     timeline,
-    todayReaction,
+    todayReactions,
+    alertReaction,
+    dismissAlert,
     inCentre,
     nextLesson,
     teacherNote: latestNote,

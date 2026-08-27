@@ -3,9 +3,20 @@ import Avatar from "../ui/Avatar";
 import Skeleton from "../ui/Skeleton";
 import { cn } from "../../utils/cn";
 
+// Positions around the avatar ring a badge can land on, picked so none of
+// them collide with the name/stars sitting right below the circle.
+const BADGE_SPOTS = [
+  "-bottom-0.5 -right-0.5",
+  "-top-1 -right-2",
+  "-bottom-1 -left-2",
+  "top-1/3 -right-3.5",
+  "-top-1 left-1/4",
+  "top-1/3 -left-3.5",
+];
+
 // The first thing a parent sees: their child, and the three facts they would
 // have asked for anyway — how many stars, where in the class, is the month paid.
-export default function Hero({ student, stars, rank, payment, todayReaction, loading }) {
+export default function Hero({ student, stars, rank, payment, todayReactions, loading }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center pt-2.5">
@@ -21,14 +32,18 @@ export default function Hero({ student, stars, rank, payment, todayReaction, loa
     <div className="flex flex-col items-center pt-2.5 text-center">
       <div className="relative inline-block">
         <Avatar src={student?.photo_url} alt={student?.full_name ?? ""} size="xl" glow />
-        {todayReaction && (
+        {(todayReactions ?? []).slice(0, BADGE_SPOTS.length).map((reaction, index) => (
           <span
-            title={[todayReaction.teacher_name, todayReaction.note].filter(Boolean).join(" · ")}
-            className="absolute -bottom-0.5 -right-0.5 flex h-7 w-7 items-center justify-center rounded-full border-[3px] border-surface bg-[linear-gradient(150deg,#4CE0B4,#22B98C)] text-[15px] shadow-glow-teal"
+            key={reaction.id ?? index}
+            title={[reaction.teacher_name, reaction.note].filter(Boolean).join(" · ")}
+            className={cn(
+              "absolute flex h-7 w-7 items-center justify-center rounded-full border-[3px] border-surface bg-[linear-gradient(150deg,#4CE0B4,#22B98C)] text-[15px] shadow-glow-teal",
+              BADGE_SPOTS[index],
+            )}
           >
-            {todayReaction.emoji}
+            {reaction.emoji}
           </span>
-        )}
+        ))}
       </div>
 
       <h1 className="mt-[11px] font-display text-[20px] font-bold tracking-tight text-ink">

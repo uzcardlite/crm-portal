@@ -1,6 +1,7 @@
 import { useState } from "react";
 import PageShell from "../components/layout/PageShell";
 import Hero from "../components/home/Hero";
+import ReactionAlert from "../components/home/ReactionAlert";
 import StatRings from "../components/home/StatRings";
 import AttendanceThread from "../components/home/AttendanceThread";
 import TodayTimeline from "../components/home/TodayTimeline";
@@ -20,12 +21,14 @@ export default function PortalHome() {
 
   return (
     <PageShell>
+      <ReactionAlert reaction={home.alertReaction} onDone={home.dismissAlert} />
+
       <Hero
         student={home.student}
         stars={home.stars}
         rank={home.rank}
         payment={home.payment}
-        todayReaction={home.todayReaction}
+        todayReactions={home.todayReactions}
         loading={home.loading}
       />
 
