@@ -11,7 +11,7 @@ const HUES = {
 
 const SIZES = {
   lg: { outer: 92, inner: 70, value: "text-[21px]", unit: "text-[11px]" },
-  md: { outer: 80, inner: 61, value: "text-[18px]", unit: "text-[10px]" },
+  md: { outer: 90, inner: 69, value: "text-[20px]", unit: "text-[11px]" },
 };
 
 export default function Ring({

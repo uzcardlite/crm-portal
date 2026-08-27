@@ -3,7 +3,7 @@ import { cn } from "../../utils/cn";
 // A carrot ring around the photo, lit from inside. Falls back to a neutral
 // silhouette rather than initials — a child's face is the point, and a letter
 // where a face should be reads as an error.
-const SIZES = { xl: 92, lg: 48, md: 38, sm: 26, xs: 21 };
+const SIZES = { xl: 108, lg: 48, md: 38, sm: 26, xs: 21 };
 
 export default function Avatar({
   src,

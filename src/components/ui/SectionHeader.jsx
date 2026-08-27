@@ -5,11 +5,11 @@ import { cn } from "../../utils/cn";
 export default function SectionHeader({ title, aside, className }) {
   return (
     <div className={cn("flex items-baseline justify-between gap-2", className)}>
-      <span className="text-[10px] font-bold uppercase tracking-[.08em] text-ink-faint">
+      <span className="text-[11px] font-bold uppercase tracking-[.08em] text-ink-faint">
         {title}
       </span>
       {aside && (
-        <span className="flex items-center gap-1.5 text-[10px] font-bold text-carrot-bright">
+        <span className="flex items-center gap-1.5 text-[11px] font-bold text-carrot-bright">
           {aside}
         </span>
       )}

@@ -32,26 +32,26 @@ export default function TodayTimeline({ events = [], inCentre }) {
       {events.length === 0 ? (
         <EmptyState icon={Clock} text="Bugun hali hech narsa qayd etilmagan" />
       ) : (
-        <div className="mt-[11px] flex flex-col">
+        <div className="mt-3 flex flex-col">
           {events.map((event, index) => (
-            <div key={`${event.time}-${index}`} className="flex gap-2.5">
+            <div key={`${event.time}-${index}`} className="flex gap-3">
               <span className="flex w-4 flex-none flex-col items-center">
-                <span className={cn("mt-[3px] h-[9px] w-[9px] flex-none rounded-full", NODE[event.kind])} />
+                <span className={cn("mt-[3px] h-[10px] w-[10px] flex-none rounded-full", NODE[event.kind])} />
                 {index < events.length - 1 && (
-                  <span className="my-0.5 min-h-[14px] w-0.5 flex-1 bg-white/[.09]" />
+                  <span className="my-0.5 min-h-[15px] w-0.5 flex-1 bg-white/[.09]" />
                 )}
               </span>
 
-              <span className={cn("min-w-0 flex-1", index < events.length - 1 ? "pb-[11px]" : "")}>
-                <b className="block text-[10.5px] font-bold text-ink">{event.title}</b>
+              <span className={cn("min-w-0 flex-1", index < events.length - 1 ? "pb-3" : "")}>
+                <b className="block text-[11.5px] font-bold text-ink">{event.title}</b>
                 {event.detail && (
-                  <span className="mt-px block text-[9px] font-semibold text-ink-faint">
+                  <span className="mt-0.5 block text-[10px] font-semibold text-ink-faint">
                     {event.detail}
                   </span>
                 )}
               </span>
 
-              <span className="flex-none text-[9.5px] font-extrabold text-ink-soft tnum">
+              <span className="flex-none text-[10.5px] font-extrabold text-ink-soft tnum">
                 {event.time}
               </span>
             </div>

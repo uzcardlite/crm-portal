@@ -18,14 +18,14 @@ export default function EmptyState({
   const heading = text || title;
 
   return (
-    <div className={cn("flex flex-col items-center gap-2 py-6 text-center", className)}>
+    <div className={cn("flex flex-col items-center gap-2.5 py-7 text-center", className)}>
       {Icon && (
-        <span className="grid h-9 w-9 place-items-center rounded-btn border border-line bg-black/25 text-ink-faint">
-          <Icon size={16} />
+        <span className="grid h-10 w-10 place-items-center rounded-btn border border-line bg-black/25 text-ink-faint">
+          <Icon size={18} />
         </span>
       )}
       {heading && (
-        <p className="max-w-[24ch] text-[10.5px] font-semibold leading-relaxed text-ink-faint">
+        <p className="max-w-[24ch] text-[11.5px] font-semibold leading-relaxed text-ink-faint">
           {heading}
         </p>
       )}

@@ -32,15 +32,15 @@ export default function AttendanceThread({ days = [], present, total, streak }) 
   return (
     <Card>
       <div className="flex items-center justify-between">
-        <span className="text-[11px] font-bold text-ink">Davomat · shu oy</span>
-        <span className="font-display text-[13px] font-bold tracking-tight text-ink tnum">
+        <span className="text-[12px] font-bold text-ink">Davomat · shu oy</span>
+        <span className="font-display text-[14px] font-bold tracking-tight text-ink tnum">
           {present}
-          <small className="text-[9.5px] font-semibold text-ink-faint"> / {total}</small>
+          <small className="text-[10px] font-semibold text-ink-faint"> / {total}</small>
         </span>
       </div>
 
       {streak > 1 && (
-        <span className="mt-[7px] inline-flex items-center gap-1.5 rounded-full bg-carrot/[.14] px-2 py-[3px] text-[9px] font-bold text-carrot-bright">
+        <span className="mt-2 inline-flex items-center gap-1.5 rounded-full bg-carrot/[.14] px-2.5 py-1 text-[9.5px] font-bold text-carrot-bright">
           🔥 {streak} dars ketma-ket
         </span>
       )}
@@ -53,19 +53,19 @@ export default function AttendanceThread({ days = [], present, total, streak }) 
             )}
             <span
               title={day.label}
-              className={cn("h-[9px] w-[9px] flex-none rounded-full", NODE[day.status])}
+              className={cn("h-[10.5px] w-[10.5px] flex-none rounded-full", NODE[day.status])}
             />
           </span>
         ))}
       </div>
 
-      <div className="mt-1.5 flex">
+      <div className="mt-2 flex">
         {days.map((day, index) => (
           <span
             key={day.date}
             className={cn(
-              "text-center text-[7.5px] font-bold text-ink-faint tnum",
-              index === 0 || index === days.length - 1 ? "flex-none basis-3.5" : "flex-1",
+              "text-center text-[8.5px] font-bold text-ink-faint tnum",
+              index === 0 || index === days.length - 1 ? "flex-none basis-4" : "flex-1",
             )}
           >
             {day.day}
@@ -73,7 +73,7 @@ export default function AttendanceThread({ days = [], present, total, streak }) 
         ))}
       </div>
 
-      <div className="mt-2.5 flex flex-wrap gap-[11px] border-t border-line pt-[9px]">
+      <div className="mt-3 flex flex-wrap gap-3 border-t border-line pt-2.5">
         <Legend className="bg-carrot-bright">Keldi</Legend>
         <Legend className="border-2 border-amber">Kechikdi</Legend>
         <Legend className="border-2 border-rose">Kelmadi</Legend>
@@ -85,8 +85,8 @@ export default function AttendanceThread({ days = [], present, total, streak }) 
 
 function Legend({ className, children }) {
   return (
-    <span className="flex items-center gap-1.5 text-[8.5px] font-bold text-ink-faint">
-      <i className={cn("h-[7px] w-[7px] rounded-full", className)} />
+    <span className="flex items-center gap-1.5 text-[9.5px] font-bold text-ink-faint">
+      <i className={cn("h-2 w-2 rounded-full", className)} />
       {children}
     </span>
   );

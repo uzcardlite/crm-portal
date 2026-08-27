@@ -8,13 +8,13 @@ import { cn } from "../../utils/cn";
 // takes off, so the ring fills on the same scale the number is read on.
 function RingCard({ children, label, note, tone }) {
   return (
-    <Card className="flex flex-col items-center gap-[9px] px-2.5 pb-3 pt-[13px]">
+    <Card className="flex flex-col items-center gap-[10px] px-2.5 pb-3.5 pt-4">
       {children}
-      <span className="text-[10.5px] font-bold text-ink">{label}</span>
+      <span className="text-[11.5px] font-bold text-ink">{label}</span>
       {note && (
         <span
           className={cn(
-            "-mt-1.5 text-[9px] font-semibold",
+            "-mt-1.5 text-[9.5px] font-semibold",
             tone === "up" && "text-teal",
             tone === "down" && "text-rose",
             !tone && "text-ink-faint",
