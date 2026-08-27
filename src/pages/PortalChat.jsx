@@ -187,7 +187,7 @@ export default function PortalChat() {
                   <ThreadRow
                     key={thread.id}
                     thread={thread}
-                    teacherName={teacherByGroup[thread.group_name]}
+                    teacherName={thread.teacher_name || teacherByGroup[thread.group_name]}
                   />
                 ))}
               </div>

@@ -13,7 +13,7 @@ import {
 } from "../api/portal";
 import { usePortalAuth } from "../context/PortalAuthContext";
 import { usePortalResource } from "./usePortalResource";
-import { formatClock, formatMoney, formatRelativeDate, MONTH_NAMES } from "../utils/format";
+import { formatClock, formatMoney, formatRelativeDate, formatTime, MONTH_NAMES } from "../utils/format";
 
 // Everything the home screen shows, assembled from the endpoints that exist.
 
@@ -75,11 +75,28 @@ export function useHomeData() {
   const friends = usePortalResource(loadFriends, enabled);
   const ranking = usePortalResource(loadRanking, enabled);
 
-  // --- attendance thread ---------------------------------------------------
+  // --- attendance thread (this week only, not the whole month) -------------
   const lessons = useMemo(() => attendance.data?.lessons ?? [], [attendance.data]);
+
+  const weekStartIso = useMemo(() => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - d.getDay());
+    return d.toISOString().slice(0, 10);
+  }, [today]);
+  const weekEndIso = useMemo(() => {
+    const d = new Date(today);
+    d.setDate(d.getDate() - d.getDay() + 6);
+    return d.toISOString().slice(0, 10);
+  }, [today]);
+
+  const weekLessons = useMemo(
+    () => lessons.filter((lesson) => lesson.date >= weekStartIso && lesson.date <= weekEndIso),
+    [lessons, weekStartIso, weekEndIso],
+  );
+
   const thread = useMemo(
     () =>
-      lessons.map((lesson) => {
+      weekLessons.map((lesson) => {
         const date = toDate(lesson.date);
         const upcoming = lesson.date > todayIso;
         return {
@@ -89,10 +106,10 @@ export function useHomeData() {
           status: upcoming && !lesson.status ? "upcoming" : lesson.status || "upcoming",
         };
       }),
-    [lessons, todayIso],
+    [weekLessons, todayIso],
   );
 
-  const counted = lessons.filter((lesson) => lesson.date <= todayIso && lesson.status);
+  const counted = weekLessons.filter((lesson) => lesson.date <= todayIso && lesson.status);
   const attended = counted.filter(
     (lesson) => lesson.status === "present" || lesson.status === "late",
   ).length;
@@ -139,7 +156,8 @@ export function useHomeData() {
   // --- behaviour and the teacher's latest note ------------------------------
   const behaviourRows = useMemo(() => behaviour.data ?? [], [behaviour.data]);
   const behaviour5 = useMemo(() => {
-    if (behaviourRows.length === 0) return null;
+    // No deduction rows at all still means something: a clean record, not
+    // "no data" — behaviourScore([]) already resolves that to a full 5.0.
     const score = behaviourScore(behaviourRows);
     // What the score would still be without this month's deductions — the
     // difference is exactly what "bu oy −0.3" is telling the parent.
@@ -173,7 +191,7 @@ export function useHomeData() {
         kind: event.direction === "in" ? "gate_in" : "gate_out",
         title: event.direction === "in" ? "Markazga kirdi" : "Markazdan chiqdi",
         detail: event.device_name || "Turniket",
-        time: formatClock(event.event_time),
+        time: formatTime(event.event_time),
         at: event.event_time,
       }));
 
@@ -199,7 +217,7 @@ export function useHomeData() {
           kind: "reaction",
           title: `${row.emoji} Ustoz reaksiya bosdi`,
           detail: row.note || `${row.teacher_name} · +${row.points} yulduzcha`,
-          time: formatClock(row.created_at),
+          time: formatTime(row.created_at),
           at: row.created_at,
         });
       });

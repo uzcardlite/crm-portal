@@ -64,6 +64,7 @@ export default function PortalSchedule() {
 
   const total = Object.values(byDay).reduce((sum, rows) => sum + rows.length, 0);
   const today = todayKey();
+  const todayIndex = DAYS.findIndex((day) => day.key === today);
 
   return (
     <PageShell>
@@ -79,20 +80,48 @@ export default function PortalSchedule() {
             <EmptyState icon={CalendarX} text="Hali dars jadvali belgilanmagan" />
           </Card>
         ) : (
-          DAYS.map((day) => {
+          DAYS.map((day, index) => {
             const rows = byDay[day.key];
-            const isToday = day.key === today;
+            // Where this day sits relative to today decides how it's dressed:
+            // done (muted), happening today (green), coming up next (amber),
+            // or further out (the plain default — nothing to say about it yet).
+            const relation =
+              index < todayIndex ? "past" : index === todayIndex ? "today" : index === todayIndex + 1 ? "tomorrow" : "future";
+
+            const cardStyle = {
+              past: "opacity-[.55]",
+              today: "border-teal/40 bg-teal/[.07] shadow-[0_0_22px_-12px_rgba(52,201,163,.6)]",
+              tomorrow: "border-carrot/[.32] shadow-[0_0_22px_-12px_rgba(236,138,69,.55)]",
+              future: "",
+            }[relation];
+
+            const labelStyle = {
+              past: "text-ink-faint",
+              today: "text-teal",
+              tomorrow: "text-carrot-bright",
+              future: "text-ink",
+            }[relation];
+
+            const asideText =
+              relation === "today"
+                ? "Bugun"
+                : relation === "tomorrow"
+                  ? "Ertaga"
+                  : rows.length > 0
+                    ? `${rows.length} dars`
+                    : "Dam olish";
+
             return (
-              <Card
-                key={day.key}
-                className={cn(isToday && "border-carrot/[.32] shadow-[0_0_22px_-12px_rgba(236,138,69,.55)]")}
-              >
+              <Card key={day.key} className={cn(cardStyle)}>
                 <div className="flex items-baseline justify-between">
-                  <span className={cn("text-[11px] font-extrabold", isToday ? "text-carrot-bright" : "text-ink")}>
-                    {day.label}
-                  </span>
-                  <span className="text-[9px] font-bold uppercase tracking-[.06em] text-ink-faint">
-                    {isToday ? "Bugun" : rows.length > 0 ? `${rows.length} dars` : "Dam olish"}
+                  <span className={cn("text-[11px] font-extrabold", labelStyle)}>{day.label}</span>
+                  <span
+                    className={cn(
+                      "text-[9px] font-bold uppercase tracking-[.06em]",
+                      relation === "today" || relation === "tomorrow" ? labelStyle : "text-ink-faint",
+                    )}
+                  >
+                    {asideText}
                   </span>
                 </div>
 

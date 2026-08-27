@@ -42,7 +42,7 @@ export default function StatRings({ mastery, behaviour, loading }) {
       <RingCard label="Baholar" note={mastery?.note} tone={mastery?.tone}>
         <Ring
           size="md"
-          hue="carrot"
+          hue="teal"
           percent={mastery?.percent ?? 0}
           value={mastery?.percent ?? 0}
           unit="%"
@@ -53,7 +53,7 @@ export default function StatRings({ mastery, behaviour, loading }) {
       <RingCard label="Axloq" note={behaviour?.note} tone={behaviour?.tone}>
         <Ring
           size="md"
-          hue="amber"
+          hue="teal"
           // 4.7 of 5.0 fills 94% — the arc and the number always agree.
           percent={((behaviour?.score ?? 0) / 5) * 100}
           value={(behaviour?.score ?? 0).toFixed(1)}
