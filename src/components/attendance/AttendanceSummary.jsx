@@ -35,7 +35,7 @@ export default function AttendanceSummary({ summary, loading }) {
           label="davomat"
         />
         <div className="flex min-w-0 flex-1 flex-col gap-2">
-          <Count swatch="bg-carrot-bright" label="Keldi" value={summary.present} />
+          <Count swatch="bg-teal" label="Keldi" value={summary.present} />
           <Count swatch="border-2 border-amber" label="Kechikdi" value={summary.late} />
           <Count swatch="border-2 border-rose" label="Kelmadi" value={summary.absent} />
         </div>

@@ -53,8 +53,8 @@ export default function TrendChart({ points = [] }) {
         <svg width="100%" height={H} viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" role="img" aria-label="Oxirgi olti oydagi o'rtacha baho">
           <defs>
             <linearGradient id="trend-fill" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#EC8A45" stopOpacity=".38" />
-              <stop offset="100%" stopColor="#EC8A45" stopOpacity="0" />
+              <stop offset="0%" stopColor="#34C9A3" stopOpacity=".38" />
+              <stop offset="100%" stopColor="#34C9A3" stopOpacity="0" />
             </linearGradient>
           </defs>
 
@@ -66,14 +66,14 @@ export default function TrendChart({ points = [] }) {
           <path
             d={`M ${line}`}
             fill="none"
-            stroke="#EC8A45"
+            stroke="#34C9A3"
             strokeWidth="2.4"
             strokeLinecap="round"
             strokeLinejoin="round"
           />
 
-          <circle cx={last.x} cy={last.y} r="9" fill="#EC8A45" fillOpacity=".22" />
-          <circle cx={last.x} cy={last.y} r="4.2" fill="#EC8A45" />
+          <circle cx={last.x} cy={last.y} r="9" fill="#34C9A3" fillOpacity=".22" />
+          <circle cx={last.x} cy={last.y} r="4.2" fill="#34C9A3" />
           <circle cx={last.x} cy={last.y} r="1.8" fill="#241C16" />
         </svg>
 
@@ -83,7 +83,7 @@ export default function TrendChart({ points = [] }) {
               key={point.key}
               className={cn(
                 "flex-1 text-center text-[8px] font-bold",
-                index === points.length - 1 ? "text-carrot-bright" : "text-ink-faint",
+                index === points.length - 1 ? "text-teal" : "text-ink-faint",
               )}
             >
               {point.label}

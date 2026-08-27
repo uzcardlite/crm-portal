@@ -26,12 +26,12 @@ export default function MasteryCard({ percent, average5, total, delta, loading }
     <div className="relative overflow-hidden rounded-card border border-line bg-surface p-[15px]">
       <span
         aria-hidden="true"
-        className="absolute -right-12 -top-14 h-[150px] w-[150px] rounded-full bg-[radial-gradient(circle,rgba(236,138,69,.28),transparent_70%)]"
+        className="absolute -right-12 -top-14 h-[150px] w-[150px] rounded-full bg-[radial-gradient(circle,rgba(52,201,163,.24),transparent_70%)]"
       />
       <div className="relative flex items-center gap-[15px]">
         <Ring
           size="lg"
-          hue="carrot"
+          hue="teal"
           percent={percent ?? 0}
           value={percent ?? 0}
           unit="%"
