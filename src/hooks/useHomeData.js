@@ -207,6 +207,22 @@ export function useHomeData() {
     return events.sort((a, b) => String(a.at).localeCompare(String(b.at)));
   }, [turnstile.data, schedule.data, reactions.data, today, todayIso]);
 
+  // --- today's reaction badge (for the avatar) ------------------------------
+  // reaction_crud.get_for_student already orders newest-first, so the first
+  // row still standing after the "today" filter is the latest one.
+  const todayReaction = useMemo(() => {
+    const row = (reactions.data ?? []).find(
+      (item) => String(item.created_at).slice(0, 10) === todayIso,
+    );
+    if (!row) return null;
+    return {
+      emoji: row.emoji,
+      teacher_name: row.teacher_name,
+      points: row.points,
+      note: row.note,
+    };
+  }, [reactions.data, todayIso]);
+
   // --- the next lesson still ahead today ------------------------------------
   const nextLesson = useMemo(() => {
     const now = `${String(today.getHours()).padStart(2, "0")}:${String(today.getMinutes()).padStart(2, "0")}`;
@@ -294,6 +310,7 @@ export function useHomeData() {
       streak: currentStreak(lessons, todayIso),
     },
     timeline,
+    todayReaction,
     inCentre,
     nextLesson,
     teacherNote: latestNote,

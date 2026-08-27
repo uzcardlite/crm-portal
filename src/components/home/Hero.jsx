@@ -5,7 +5,7 @@ import { cn } from "../../utils/cn";
 
 // The first thing a parent sees: their child, and the three facts they would
 // have asked for anyway — how many stars, where in the class, is the month paid.
-export default function Hero({ student, stars, rank, payment, loading }) {
+export default function Hero({ student, stars, rank, payment, todayReaction, loading }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center pt-2.5">
@@ -19,7 +19,17 @@ export default function Hero({ student, stars, rank, payment, loading }) {
 
   return (
     <div className="flex flex-col items-center pt-2.5 text-center">
-      <Avatar src={student?.photo_url} alt={student?.full_name ?? ""} size="xl" glow />
+      <div className="relative inline-block">
+        <Avatar src={student?.photo_url} alt={student?.full_name ?? ""} size="xl" glow />
+        {todayReaction && (
+          <span
+            title={[todayReaction.teacher_name, todayReaction.note].filter(Boolean).join(" · ")}
+            className="absolute -bottom-0.5 -right-0.5 flex h-7 w-7 items-center justify-center rounded-full border-[3px] border-surface bg-[linear-gradient(150deg,#4CE0B4,#22B98C)] text-[15px] shadow-glow-teal"
+          >
+            {todayReaction.emoji}
+          </span>
+        )}
+      </div>
 
       <h1 className="mt-[11px] font-display text-[20px] font-bold tracking-tight text-ink">
         {student?.full_name}
