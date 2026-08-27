@@ -28,7 +28,7 @@ export default function PortalHome() {
         stars={home.stars}
         rank={home.rank}
         payment={home.payment}
-        todayReactions={home.todayReactions}
+        monthReactions={home.monthReactions}
         loading={home.loading}
       />
 

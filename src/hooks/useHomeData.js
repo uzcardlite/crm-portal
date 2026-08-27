@@ -207,12 +207,14 @@ export function useHomeData() {
     return events.sort((a, b) => String(a.at).localeCompare(String(b.at)));
   }, [turnstile.data, schedule.data, reactions.data, today, todayIso]);
 
-  // --- today's reaction badges (scattered around the avatar) ---------------
-  // reaction_crud.get_for_student already orders newest-first.
-  const todayReactions = useMemo(
+  // --- this month's reaction badges (scattered around the avatar) ----------
+  // Resets on the 1st: only rows dated within the current calendar month
+  // count, so the avatar clears out for a new month instead of piling up
+  // forever. reaction_crud.get_for_student already orders newest-first.
+  const monthReactions = useMemo(
     () =>
       (reactions.data ?? [])
-        .filter((row) => String(row.created_at).slice(0, 10) === todayIso)
+        .filter((row) => String(row.created_at).slice(0, 7) === thisMonthKey)
         .map((row) => ({
           id: row.id,
           emoji: row.emoji,
@@ -221,7 +223,7 @@ export function useHomeData() {
           note: row.note,
           created_at: row.created_at,
         })),
-    [reactions.data, todayIso],
+    [reactions.data, thisMonthKey],
   );
 
   // --- live "a reaction just landed" banner ---------------------------------
@@ -361,7 +363,7 @@ export function useHomeData() {
       streak: currentStreak(lessons, todayIso),
     },
     timeline,
-    todayReactions,
+    monthReactions,
     alertReaction,
     dismissAlert,
     inCentre,

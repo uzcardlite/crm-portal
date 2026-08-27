@@ -3,20 +3,28 @@ import Avatar from "../ui/Avatar";
 import Skeleton from "../ui/Skeleton";
 import { cn } from "../../utils/cn";
 
-// Positions around the avatar ring a badge can land on, picked so none of
-// them collide with the name/stars sitting right below the circle.
-const BADGE_SPOTS = [
-  "-bottom-0.5 -right-0.5",
-  "-top-1 -right-2",
-  "-bottom-1 -left-2",
-  "top-1/3 -right-3.5",
-  "-top-1 left-1/4",
-  "top-1/3 -left-3.5",
-];
+// A month can bring anywhere from one reaction to a couple dozen, so spots
+// are computed, not fixed: evenly spaced around the ring, starting at the
+// top and going clockwise. Badges shrink a little once there are enough of
+// them that full size would start overlapping.
+function reactionSpot(index, total) {
+  const angle = (index / total) * 2 * Math.PI - Math.PI / 2;
+  const radius = 54;
+  return {
+    top: `${50 + radius * Math.sin(angle)}%`,
+    left: `${50 + radius * Math.cos(angle)}%`,
+  };
+}
+
+function reactionBadgeSize(total) {
+  if (total > 10) return 20;
+  if (total > 6) return 24;
+  return 28;
+}
 
 // The first thing a parent sees: their child, and the three facts they would
 // have asked for anyway — how many stars, where in the class, is the month paid.
-export default function Hero({ student, stars, rank, payment, todayReactions, loading }) {
+export default function Hero({ student, stars, rank, payment, monthReactions, loading }) {
   if (loading) {
     return (
       <div className="flex flex-col items-center pt-2.5">
@@ -32,18 +40,25 @@ export default function Hero({ student, stars, rank, payment, todayReactions, lo
     <div className="flex flex-col items-center pt-2.5 text-center">
       <div className="relative inline-block">
         <Avatar src={student?.photo_url} alt={student?.full_name ?? ""} size="xl" glow />
-        {(todayReactions ?? []).slice(0, BADGE_SPOTS.length).map((reaction, index) => (
-          <span
-            key={reaction.id ?? index}
-            title={[reaction.teacher_name, reaction.note].filter(Boolean).join(" · ")}
-            className={cn(
-              "absolute flex h-7 w-7 items-center justify-center rounded-full border-[3px] border-surface bg-[linear-gradient(150deg,#4CE0B4,#22B98C)] text-[15px] shadow-glow-teal",
-              BADGE_SPOTS[index],
-            )}
-          >
-            {reaction.emoji}
-          </span>
-        ))}
+        {(monthReactions ?? []).map((reaction, index, all) => {
+          const size = reactionBadgeSize(all.length);
+          return (
+            <span
+              key={reaction.id ?? index}
+              title={[reaction.teacher_name, reaction.note].filter(Boolean).join(" · ")}
+              style={{
+                ...reactionSpot(index, all.length),
+                width: size,
+                height: size,
+                fontSize: size > 24 ? 15 : size > 20 ? 13 : 11,
+                transform: "translate(-50%, -50%)",
+              }}
+              className="absolute flex items-center justify-center rounded-full border-[3px] border-surface bg-[linear-gradient(150deg,#4CE0B4,#22B98C)] shadow-glow-teal"
+            >
+              {reaction.emoji}
+            </span>
+          );
+        })}
       </div>
 
       <h1 className="mt-[11px] font-display text-[20px] font-bold tracking-tight text-ink">
