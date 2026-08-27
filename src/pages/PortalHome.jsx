@@ -1,338 +1,59 @@
-import { useCallback, useMemo, useState } from "react";
-import { Link } from "react-router-dom";
-import { Banknote, CalendarCheck, CalendarX, GraduationCap } from "lucide-react";
-import Badge from "../components/ui/Badge";
-import Card from "../components/ui/Card";
-import EmptyState from "../components/ui/EmptyState";
-import KoshinStar from "../components/ui/KoshinStar";
-import ProgressRing from "../components/ui/ProgressRing";
-import Skeleton from "../components/ui/Skeleton";
-import ChildSwitcher from "../components/portal/ChildSwitcher";
-import DayStrip from "../components/portal/DayStrip";
-import EventRow from "../components/portal/EventRow";
-import GradeRow from "../components/portal/GradeRow";
-import LessonCard from "../components/portal/LessonCard";
-import PaymentRow from "../components/portal/PaymentRow";
-import PortalErrorState from "../components/portal/PortalErrorState";
-import SectionHeader from "../components/portal/SectionHeader";
-import {
-  getPortalGrades,
-  getPortalPayments,
-  getPortalSchedule,
-  getPortalSummary,
-} from "../api/portal";
-import { usePortalAuth } from "../context/PortalAuthContext";
-import { usePortalResource } from "../hooks/usePortalResource";
-import { DAY_LABELS, PORTAL_QUICK_LINKS } from "../constants/portal";
-import { formatDate, formatMoney, formatMonth } from "../utils/format";
-import {
-  dayKeyFromDate,
-  hueIndexForId,
-  lessonTimeRange,
-  lessonsForDayKey,
-  toIsoDate,
-} from "../utils/portalSchedule";
+import { useState } from "react";
+import PageShell from "../components/layout/PageShell";
+import Hero from "../components/home/Hero";
+import StatRings from "../components/home/StatRings";
+import AttendanceThread from "../components/home/AttendanceThread";
+import TodayTimeline from "../components/home/TodayTimeline";
+import TeacherNote from "../components/home/TeacherNote";
+import Friends from "../components/home/Friends";
+import GroupRanking from "../components/home/GroupRanking";
+import NextLesson from "../components/home/NextLesson";
+import FriendSheet from "../components/home/FriendSheet";
+import { useHomeData } from "../hooks/useHomeData";
 
-const MAX_PREVIEW_ROWS = 3;
-
-// Monday-first current week, used by the home DayStrip.
-function currentWeekDays(today) {
-  const monday = new Date(today);
-  monday.setDate(today.getDate() - ((today.getDay() + 6) % 7));
-  return Array.from({ length: 7 }, (_, index) => {
-    const date = new Date(monday);
-    date.setDate(monday.getDate() + index);
-    return date;
-  });
-}
-
+// The order here is the order a parent asks their questions in: who is this,
+// how are they doing, are they there today, what did the teacher say, who are
+// they with, where do they stand, what is next.
 export default function PortalHome() {
-  const { students, activeStudentId, activeStudent, selectStudent } = usePortalAuth();
-  const today = useMemo(() => new Date(), []);
-  const todayIso = toIsoDate(today);
-  const [selectedIso, setSelectedIso] = useState(todayIso);
-
-  const enabled = Boolean(activeStudentId);
-  const loadSummary = useCallback(() => getPortalSummary(activeStudentId), [activeStudentId]);
-  const loadSchedule = useCallback(() => getPortalSchedule(activeStudentId), [activeStudentId]);
-  const loadGrades = useCallback(() => getPortalGrades(activeStudentId), [activeStudentId]);
-  const loadPayments = useCallback(() => getPortalPayments(activeStudentId), [activeStudentId]);
-
-  const summary = usePortalResource(loadSummary, enabled);
-  const schedule = usePortalResource(loadSchedule, enabled);
-  const grades = usePortalResource(loadGrades, enabled);
-  const payments = usePortalResource(loadPayments, enabled);
-
-  const debt = summary.data?.debt;
-  const recentEvents = summary.data?.recent_events ?? [];
-
-  // Rule: a 0% with no attendance event behind it is "no data", not a score.
-  const hasAttendanceData =
-    Number(summary.data?.attendance_percent ?? 0) > 0 ||
-    recentEvents.some((event) => event.type === "attendance");
-  const attendancePercent = hasAttendanceData
-    ? Number(summary.data?.attendance_percent ?? 0)
-    : null;
-
-  const weekDays = useMemo(() => {
-    const scheduleItems = schedule.data ?? [];
-    return currentWeekDays(today).map((date) => {
-      const iso = toIsoDate(date);
-      const dayKey = dayKeyFromDate(date);
-      return {
-        iso,
-        weekday: DAY_LABELS[dayKey],
-        day: date.getDate(),
-        isToday: iso === todayIso,
-        hasLesson: scheduleItems.some(
-          (item) => Array.isArray(item.days) && item.days.includes(dayKey),
-        ),
-      };
-    });
-  }, [schedule.data, today, todayIso]);
-
-  const selectedLessons = useMemo(() => {
-    const [year, month, day] = selectedIso.split("-").map(Number);
-    const dayKey = dayKeyFromDate(new Date(year, month - 1, day));
-    return lessonsForDayKey(schedule.data, dayKey);
-  }, [schedule.data, selectedIso]);
-
-  const sortedGrades = useMemo(
-    () => [...(grades.data ?? [])].sort((a, b) => String(b.date).localeCompare(String(a.date))),
-    [grades.data],
-  );
-
-  // Average = sum(score) / sum(max_score); no max means no comparable average.
-  const averagePercent = useMemo(() => {
-    const totals = sortedGrades.reduce(
-      (acc, grade) => {
-        acc.score += Number(grade.score ?? 0);
-        acc.max += Number(grade.max_score ?? 0);
-        return acc;
-      },
-      { score: 0, max: 0 },
-    );
-    if (totals.max === 0) return null;
-    return Math.min(100, Math.round((totals.score / totals.max) * 100));
-  }, [sortedGrades]);
-
-  const recentPayments = (payments.data?.history ?? []).slice(0, MAX_PREVIEW_ROWS);
+  const home = useHomeData();
+  const [openFriend, setOpenFriend] = useState(null);
 
   return (
-    <>
-      {/* Greeting — a soft amber gradient wash with a faint koshin-star
-          watermark in the corner. Amber glows warm on the light card and on the
-          deep navy of night mode alike (the national accent). */}
-      <div className="relative overflow-hidden rounded-card border border-accent-light/40 bg-gradient-to-br from-accent-light/25 to-accent-light/5 px-4 py-4 dark:border-accent/25 dark:from-accent/15 dark:to-accent/[0.03]">
-        <KoshinStar
-          size={150}
-          strokeWidth={4}
-          className="pointer-events-none absolute -right-6 -top-8 text-accent/[0.07] dark:text-accent/[0.12]"
+    <PageShell>
+      <Hero
+        student={home.student}
+        stars={home.stars}
+        rank={home.rank}
+        payment={home.payment}
+        loading={home.loading}
+      />
+
+      <div className="flex flex-col gap-[13px] px-4 pb-[108px] pt-[18px]">
+        <StatRings
+          mastery={home.mastery}
+          behaviour={home.behaviour}
+          loading={home.loading}
         />
-        <div className="relative flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-2xl font-semibold text-accent-dark dark:text-accent-light">Assalomu alaykum!</h1>
-            <p className="mt-1 truncate text-sm text-fg-muted">
-              {activeStudent
-                ? `${activeStudent.full_name} · ${activeStudent.tenant_name}`
-                : ""}
-            </p>
-          </div>
-          {summary.loading ? (
-            <Skeleton className="h-6 w-24 rounded-full" />
-          ) : debt ? (
-            <Badge variant={debt.has_debt ? "danger" : "success"}>
-              {debt.has_debt ? formatMoney(debt.amount) : "TO'LANGAN"}
-            </Badge>
-          ) : null}
-        </div>
+
+        <AttendanceThread
+          days={home.attendance.days}
+          present={home.attendance.present}
+          total={home.attendance.total}
+          streak={home.attendance.streak}
+        />
+
+        <TodayTimeline events={home.timeline} inCentre={home.inCentre} />
+
+        <TeacherNote note={home.teacherNote} />
+
+        <Friends friends={home.friends} onOpen={setOpenFriend} />
+
+        <GroupRanking groups={home.ranking} />
+
+        <NextLesson lesson={home.nextLesson} />
       </div>
 
-      <ChildSwitcher
-        activeId={activeStudentId}
-        onChange={selectStudent}
-      >
-        {students}
-      </ChildSwitcher>
-
-      {/* Quick-access tiles for the sections that have no bottom tab of their
-          own (homework, behaviour, menu, turnstile, booking, chat). */}
-      <div className="grid grid-cols-3 gap-3">
-        {PORTAL_QUICK_LINKS.map(({ to, label, icon: Icon }) => (
-          <Link
-            key={to}
-            to={to}
-            className="flex flex-col items-center gap-2 rounded-card border border-line bg-surface p-3 text-center shadow-card transition-shadow hover:shadow-card-hover"
-          >
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-accent-light/30 text-accent-dark dark:bg-accent/15 dark:text-accent">
-              <Icon size={20} />
-            </span>
-            <span className="text-[11px] font-medium leading-tight text-fg-secondary">
-              {label}
-            </span>
-          </Link>
-        ))}
-      </div>
-
-      {/* Two headline numbers: attendance this month and the grade average. */}
-      {summary.loading || grades.loading ? (
-        <div className="grid grid-cols-2 gap-3">
-          <Skeleton className="h-[88px] rounded-card" />
-          <Skeleton className="h-[88px] rounded-card" />
-        </div>
-      ) : (
-        <div className="grid grid-cols-2 gap-3">
-          <Card padding="p-4">
-            <div className="flex items-center gap-3">
-              <ProgressRing value={attendancePercent} size={56}>
-                {attendancePercent !== null ? `${attendancePercent}%` : null}
-              </ProgressRing>
-              <div className="min-w-0">
-                <p className="text-xs text-fg-muted">Davomat</p>
-                <p className="text-xs text-fg-faint">
-                  {attendancePercent === null ? "Ma'lumot yo'q" : "Bu oy"}
-                </p>
-              </div>
-            </div>
-          </Card>
-          <Card padding="p-4">
-            <p className="text-2xl font-semibold tabular-nums text-fg">
-              {averagePercent === null ? (
-                <span className="text-fg-faint">—</span>
-              ) : (
-                `${averagePercent}%`
-              )}
-            </p>
-            <p className="mt-1 text-xs text-fg-muted">O'rtacha baho</p>
-          </Card>
-        </div>
-      )}
-
-      <Card padding="p-4">
-        <div className="flex flex-col gap-3">
-          <SectionHeader title="Dars jadvali" to="/schedule" />
-          {schedule.loading ? (
-            <>
-              <Skeleton className="h-14 w-full rounded-card" />
-              {Array.from({ length: MAX_PREVIEW_ROWS }, (_, index) => (
-                <Skeleton key={index} className="h-16 rounded-card" />
-              ))}
-            </>
-          ) : schedule.error ? (
-            <PortalErrorState onRetry={schedule.reload} />
-          ) : (
-            <>
-              <DayStrip days={weekDays} activeIso={selectedIso} onSelect={setSelectedIso} />
-              {selectedLessons.length === 0 ? (
-                <EmptyState
-                  size="sm"
-                  icon={CalendarX}
-                  title={selectedIso === todayIso ? "Bugun dars yo'q" : "Bu kuni dars yo'q"}
-                  description="Keyingi dars jadvalda ko'rsatilgan."
-                />
-              ) : (
-                selectedLessons.slice(0, MAX_PREVIEW_ROWS).map((lesson) => (
-                  <LessonCard
-                    key={lesson.group_id}
-                    time={lessonTimeRange(lesson.time, lesson.duration_minutes)}
-                    groupName={lesson.group_name}
-                    teacherName={lesson.teacher_name}
-                    roomName={lesson.room_name}
-                    colorIndex={hueIndexForId(lesson.group_id)}
-                  />
-                ))
-              )}
-            </>
-          )}
-        </div>
-      </Card>
-
-      <Card padding="p-4">
-        <div className="flex flex-col gap-3">
-          <SectionHeader title="So'nggi baholar" to="/grades" />
-          {grades.loading ? (
-            <div>
-              {Array.from({ length: MAX_PREVIEW_ROWS }, (_, index) => (
-                <Skeleton key={index} className="mt-2 h-12" />
-              ))}
-            </div>
-          ) : grades.error ? (
-            <PortalErrorState onRetry={grades.reload} />
-          ) : sortedGrades.length === 0 ? (
-            <EmptyState size="sm" icon={GraduationCap} title="Hozircha baho yo'q" />
-          ) : (
-            <div>
-              {sortedGrades.slice(0, MAX_PREVIEW_ROWS).map((grade) => (
-                <GradeRow
-                  key={`${grade.exam_id}-${grade.group_id}`}
-                  title={grade.exam_name}
-                  meta={`${grade.group_name} · ${formatDate(grade.date)}`}
-                  score={grade.score}
-                  maxScore={grade.max_score}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </Card>
-
-      <Card padding="p-4">
-        <div className="flex flex-col gap-3">
-          <SectionHeader title="To'lovlar" to="/payments" />
-          {payments.loading ? (
-            <div>
-              {Array.from({ length: MAX_PREVIEW_ROWS }, (_, index) => (
-                <Skeleton key={index} className="mt-2 h-12" />
-              ))}
-            </div>
-          ) : payments.error ? (
-            <PortalErrorState onRetry={payments.reload} />
-          ) : recentPayments.length === 0 ? (
-            <EmptyState size="sm" icon={Banknote} title="To'lovlar tarixi bo'sh" />
-          ) : (
-            <div>
-              {recentPayments.map((payment) => (
-                <PaymentRow
-                  key={payment.id}
-                  date={payment.payment_date}
-                  title={formatMonth(payment.month_for)}
-                  amount={payment.amount}
-                  status="paid"
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </Card>
-
-      <Card padding="p-4">
-        <div className="flex flex-col gap-3">
-          <SectionHeader title="So'nggi harakatlar" />
-          {summary.loading ? (
-            <div>
-              {Array.from({ length: MAX_PREVIEW_ROWS }, (_, index) => (
-                <Skeleton key={index} className="mt-2 h-12" />
-              ))}
-            </div>
-          ) : summary.error ? (
-            <PortalErrorState onRetry={summary.reload} />
-          ) : recentEvents.length === 0 ? (
-            <EmptyState size="sm" icon={CalendarCheck} title="Hozircha harakat yo'q" />
-          ) : (
-            <div>
-              {recentEvents.map((event, index) => (
-                <EventRow
-                  key={`${event.type}-${event.date}-${index}`}
-                  icon={event.type === "payment" ? Banknote : CalendarCheck}
-                  tone={event.type === "payment" ? "accent" : "neutral"}
-                  title={event.label}
-                  meta={formatDate(event.date)}
-                />
-              ))}
-            </div>
-          )}
-        </div>
-      </Card>
-    </>
+      <FriendSheet friend={openFriend} onClose={() => setOpenFriend(null)} />
+    </PageShell>
   );
 }

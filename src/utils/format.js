@@ -59,6 +59,18 @@ export function formatMonth(value) {
   return `${MONTH_NAMES[Number(month) - 1]} ${year}`;
 }
 
+// "2026-08-20" -> "2 kun oldin" / "Bugun" / "Kecha" / falls back to formatDate
+// once it is more than a week old, since "23 kun oldin" stops being useful.
+export function formatRelativeDate(value) {
+  if (!value) return EMPTY_VALUE;
+  const date = new Date(value);
+  const days = Math.floor((Date.now() - date.getTime()) / 86400000);
+  if (days <= 0) return "Bugun";
+  if (days === 1) return "Kecha";
+  if (days < 7) return `${days} kun oldin`;
+  return formatDate(value);
+}
+
 // "Ali Valiyev Botirovich" -> "AV" (Avatar fallback)
 export function initials(fullName) {
   if (!fullName) return "?";

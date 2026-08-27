@@ -1,206 +1,238 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import { ArrowLeft, Send } from "lucide-react";
+import { ChevronLeft, ChevronRight, Send } from "lucide-react";
+import PageShell from "../components/layout/PageShell";
+import Avatar from "../components/ui/Avatar";
 import Skeleton from "../components/ui/Skeleton";
+import EmptyState from "../components/ui/EmptyState";
 import PortalErrorState from "../components/portal/PortalErrorState";
+import { MessageCircle } from "lucide-react";
 import { toast } from "../components/ui/Toast";
 import {
+  createPortalAbsenceNotice,
   getPortalChatMessages,
+  getPortalChatTeachers,
   getPortalChatThreads,
+  getPortalGrades,
   markPortalChatRead,
   sendPortalChatMessage,
 } from "../api/portal";
 import { usePortalAuth } from "../context/PortalAuthContext";
+import { usePortalResource } from "../hooks/usePortalResource";
 import { getErrorMessage } from "../utils/apiError";
-import { formatTime } from "../utils/format";
 import { cn } from "../utils/cn";
+import { formatClock, formatDate } from "../utils/format";
 
-const POLL_MS = 6000;
+// One conversation. Replies a parent sends most often sit above the field, so
+// "bugun kelolmaydi" is one tap rather than a sentence typed at a bus stop.
+const QUICK = ["Rahmat!", "Bugun kelolmaydi", "Savol bor"];
+
+function dayLabel(value) {
+  const date = String(value).slice(0, 10);
+  const todayIso = new Date().toISOString().slice(0, 10);
+  if (date === todayIso) return "Bugun";
+  const days = Math.round((new Date(todayIso) - new Date(date)) / 86400000);
+  if (days === 1) return "Kecha";
+  return formatDate(value);
+}
 
 export default function PortalChatThread() {
   const { threadId } = useParams();
   const { activeStudentId } = usePortalAuth();
-
-  const [messages, setMessages] = useState([]);
-  const [title, setTitle] = useState("Suhbat");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(false);
   const [draft, setDraft] = useState("");
   const [sending, setSending] = useState(false);
+  const endRef = useRef(null);
 
-  const bottomRef = useRef(null);
-  // Only mark-read once we have actually seen unread teacher messages, and only
-  // fire the POST once per unread batch so polling does not spam the endpoint.
-  const readInFlight = useRef(false);
+  const loadMessages = useCallback(() => getPortalChatMessages(threadId), [threadId]);
+  const loadThreads = useCallback(() => getPortalChatThreads(activeStudentId), [activeStudentId]);
+  const loadTeachers = useCallback(() => getPortalChatTeachers(activeStudentId), [activeStudentId]);
+  const loadGrades = useCallback(() => getPortalGrades(activeStudentId), [activeStudentId]);
 
-  const scrollToBottom = useCallback(() => {
-    bottomRef.current?.scrollIntoView({ block: "end" });
-  }, []);
+  const messages = usePortalResource(loadMessages, Boolean(threadId));
+  const threads = usePortalResource(loadThreads, Boolean(activeStudentId));
+  const teachers = usePortalResource(loadTeachers, Boolean(activeStudentId));
+  const grades = usePortalResource(loadGrades, Boolean(activeStudentId));
 
-  const markReadIfNeeded = useCallback(
-    (rows) => {
-      const hasUnreadTeacher = rows.some((m) => m.sender_type === "teacher" && !m.read_at);
-      if (!hasUnreadTeacher || readInFlight.current) return;
-      readInFlight.current = true;
-      markPortalChatRead(threadId)
-        .catch(() => {})
-        .finally(() => {
-          readInFlight.current = false;
-        });
-    },
-    [threadId],
-  );
+  const thread = (threads.data ?? []).find((row) => String(row.id) === String(threadId));
+  const teacherName = useMemo(() => {
+    if (!thread?.group_name) return null;
+    return (teachers.data ?? []).find((teacher) => teacher.group_name === thread.group_name)
+      ?.teacher_name;
+  }, [teachers.data, thread]);
 
-  // Initial load: messages + a title pulled from the thread list.
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(false);
-
-    getPortalChatMessages(threadId)
-      .then((rows) => {
-        if (cancelled) return;
-        setMessages(rows);
-        setLoading(false);
-        markReadIfNeeded(rows);
-      })
-      .catch(() => {
-        if (cancelled) return;
-        setError(true);
-        setLoading(false);
+  // This teacher's grades for this child, one per day — so the day a mark
+  // came in shows as a card in the same conversation, not only in Baholash.
+  const gradeByDate = useMemo(() => {
+    const map = {};
+    (grades.data ?? [])
+      .filter((row) => row.group_name === thread?.group_name)
+      .forEach((row) => {
+        map[String(row.date).slice(0, 10)] = row;
       });
+    return map;
+  }, [grades.data, thread]);
 
-    if (activeStudentId) {
-      getPortalChatThreads(activeStudentId)
-        .then((threads) => {
-          if (cancelled) return;
-          const thread = threads.find((t) => String(t.id) === String(threadId));
-          if (thread) setTitle(thread.group_name || thread.student_full_name || "Suhbat");
-        })
-        .catch(() => {});
-    }
-
-    return () => {
-      cancelled = true;
-    };
-  }, [threadId, activeStudentId, markReadIfNeeded]);
-
-  // Poll for new messages while the thread is open.
+  // Opening the conversation is what marks it read — the parent has seen it.
   useEffect(() => {
-    const id = setInterval(() => {
-      getPortalChatMessages(threadId)
-        .then((rows) => {
-          setMessages(rows);
-          markReadIfNeeded(rows);
-        })
-        .catch(() => {});
-    }, POLL_MS);
-    return () => clearInterval(id);
-  }, [threadId, markReadIfNeeded]);
+    if (!threadId) return;
+    markPortalChatRead(threadId).catch(() => {});
+  }, [threadId]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [messages, scrollToBottom]);
+    endRef.current?.scrollIntoView({ block: "end" });
+  }, [messages.data]);
 
-  const handleSend = useCallback(
-    (event) => {
-      event.preventDefault();
-      const body = draft.trim();
-      if (!body || sending) return;
-      setSending(true);
-      sendPortalChatMessage(threadId, body)
-        .then((message) => {
-          setMessages((current) => [...current, message]);
-          setDraft("");
-        })
-        .catch((requestError) => {
-          toast.error(getErrorMessage(requestError));
-        })
-        .finally(() => setSending(false));
-    },
-    [draft, sending, threadId],
-  );
+  function send(body) {
+    const text = body.trim();
+    if (!text || sending) return;
+    setSending(true);
+    sendPortalChatMessage(threadId, text)
+      .then(() => {
+        setDraft("");
+        messages.reload?.();
+      })
+      .catch((error) => toast.error(getErrorMessage(error, "Xabar yuborilmadi")))
+      .finally(() => setSending(false));
+  }
+
+  // "Bugun kelolmaydi" is more than a sentence to the teacher — it also has to
+  // land in Davomat as a real absence notice, not just sit in this thread.
+  function sendQuick(text) {
+    send(text);
+    if (text !== "Bugun kelolmaydi") return;
+    createPortalAbsenceNotice(threadId, text)
+      .then(() => toast.success("Davomat bo'limiga ham yozib qo'yildi"))
+      .catch((error) => toast.error(getErrorMessage(error, "Sababni yozib bo'lmadi")));
+  }
+
+  const rows = messages.data ?? [];
 
   return (
-    <div className="flex min-h-[70dvh] flex-col">
-      <div className="flex items-center gap-2">
+    <PageShell glow={false}>
+      <div className="flex items-center gap-2.5 border-b border-line px-3.5 pb-[11px] pt-2.5">
         <Link
           to="/chat"
           aria-label="Orqaga"
-          className="inline-flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-btn text-fg-muted transition-colors active:bg-surface-sunken"
+          className="grid h-7 w-7 flex-none place-items-center rounded-[9px] border border-line bg-surface text-ink-soft"
         >
-          <ArrowLeft size={16} />
+          <ChevronLeft size={12} strokeWidth={2.6} />
         </Link>
-        <h1 className="truncate text-lg font-semibold text-fg">{title}</h1>
+        <Avatar src={thread?.photo_url} size="md" />
+        <span className="min-w-0 flex-1">
+          <b className="block truncate text-[12px] font-bold text-ink">
+            {teacherName || thread?.group_name || "Ustoz"}
+          </b>
+          {teacherName && thread?.group_name && (
+            <span className="mt-px block truncate text-[8.5px] font-semibold text-carrot-bright">
+              {thread.group_name}
+            </span>
+          )}
+        </span>
       </div>
 
-      <div className="mt-4 flex-1">
-        {loading ? (
-          <div className="flex flex-col gap-3">
-            {Array.from({ length: 5 }, (_, index) => (
-              <Skeleton
-                key={index}
-                className={cn("h-10 w-2/3 rounded-card", index % 2 ? "self-end" : "self-start")}
-              />
-            ))}
-          </div>
-        ) : error ? (
-          <PortalErrorState onRetry={() => window.location.reload()} />
-        ) : messages.length === 0 ? (
-          <p className="py-10 text-center text-sm text-fg-faint">
-            Hali xabar yo'q. Birinchi bo'lib yozing.
-          </p>
+      <div className="flex flex-col gap-[9px] px-3.5 pb-[132px] pt-3.5">
+        {messages.loading ? (
+          <>
+            <Skeleton className="h-12 w-3/4 self-start rounded-[15px]" />
+            <Skeleton className="h-10 w-2/3 self-end rounded-[15px]" />
+            <Skeleton className="h-14 w-4/5 self-start rounded-[15px]" />
+          </>
+        ) : messages.error ? (
+          <PortalErrorState size="md" title="Xabarlarni yuklab bo'lmadi" onRetry={messages.reload} />
+        ) : rows.length === 0 ? (
+          <EmptyState icon={MessageCircle} text="Hali xabar yo'q — birinchi bo'lib yozing" />
         ) : (
-          <div className="flex flex-col gap-2">
-            {messages.map((message) => {
-              const isParent = message.sender_type === "parent";
-              return (
+          rows.map((message, index) => {
+            const mine = message.sender_type === "parent";
+            const previous = rows[index - 1];
+            const dateKey = String(message.created_at).slice(0, 10);
+            const newDay = !previous || String(previous.created_at).slice(0, 10) !== dateKey;
+            const dayGrade = newDay ? gradeByDate[dateKey] : null;
+
+            return (
+              <div key={message.id} className="contents">
+                {newDay && (
+                  <span className="self-center rounded-full border border-line bg-black/[.28] px-2.5 py-[3px] text-[8.5px] font-bold text-ink-faint">
+                    {dayLabel(message.created_at)}
+                  </span>
+                )}
+                {dayGrade && (
+                  <Link
+                    to="/grades"
+                    className="flex items-center gap-2.5 self-start rounded-[15px] border border-carrot/[.28] bg-[linear-gradient(140deg,rgba(210,113,47,.18),rgba(210,113,47,.05))] px-[11px] py-2.5"
+                  >
+                    <span className="grid h-[30px] w-[30px] flex-none place-items-center rounded-[10px] bg-carrot/[.2] font-display text-[12px] font-bold tracking-tight text-carrot-bright tnum">
+                      {dayGrade.score}
+                    </span>
+                    <span className="min-w-0 flex-1">
+                      <b className="block truncate text-[10px] font-bold text-ink">
+                        {dayGrade.exam_name}
+                      </b>
+                      <span className="mt-px block truncate text-[8.5px] font-semibold text-ink-faint">
+                        {dayGrade.group_name} · {dayGrade.score}/{dayGrade.max_score}
+                      </span>
+                    </span>
+                    <ChevronRight size={12} strokeWidth={2.4} className="flex-none text-ink-faint" />
+                  </Link>
+                )}
                 <div
-                  key={message.id}
                   className={cn(
-                    "max-w-[80%] rounded-card px-3 py-2",
-                    isParent
-                      ? "self-end bg-accent text-accent-dark"
-                      : "self-start bg-surface text-fg shadow-card",
+                    "max-w-[78%] rounded-[15px] px-[11px] py-[9px] text-[10.5px] font-medium leading-relaxed",
+                    mine
+                      ? "self-end rounded-br-[5px] bg-carrot-grad font-semibold text-[#2A1206] shadow-glow"
+                      : "self-start rounded-bl-[5px] border border-line bg-surface text-ink",
                   )}
                 >
-                  <p className="whitespace-pre-wrap break-words text-sm">{message.body}</p>
-                  <p
-                    className={cn(
-                      "mt-1 text-right text-[11px]",
-                      isParent ? "text-accent-dark/70" : "text-fg-faint",
-                    )}
-                  >
-                    {formatTime(message.created_at)}
-                  </p>
+                  {message.body}
+                  <span className={cn("mt-1 block text-[8px] font-bold", mine ? "opacity-55" : "opacity-60")}>
+                    {formatClock(message.created_at)}
+                  </span>
                 </div>
-              );
-            })}
-            <div ref={bottomRef} />
-          </div>
+              </div>
+            );
+          })
         )}
+        <span ref={endRef} />
       </div>
 
-      <form
-        onSubmit={handleSend}
-        className="sticky bottom-16 mt-3 flex items-end gap-2 md:bottom-0"
-      >
-        <textarea
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-          placeholder="Xabar yozing..."
-          rows={1}
-          className="max-h-32 flex-1 resize-none rounded-btn border border-line-strong bg-surface px-3 py-2 text-sm text-fg placeholder:text-fg-faint focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/40"
-        />
-        <button
-          type="submit"
-          disabled={!draft.trim() || sending}
-          aria-label="Yuborish"
-          className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-accent text-accent-dark transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+      <div className="fixed inset-x-3 bottom-3 z-30 mx-auto max-w-lg">
+        <div className="mb-1.5 flex gap-1.5">
+          {QUICK.map((text) => (
+            <button
+              key={text}
+              type="button"
+              onClick={() => sendQuick(text)}
+              disabled={sending}
+              className="rounded-full border border-carrot/[.28] bg-carrot/[.13] px-2.5 py-[5px] text-[9px] font-bold text-carrot-bright disabled:opacity-50"
+            >
+              {text}
+            </button>
+          ))}
+        </div>
+
+        <form
+          onSubmit={(event) => {
+            event.preventDefault();
+            send(draft);
+          }}
+          className="flex items-center gap-2 rounded-[20px] border border-white/[.09] bg-surface/[.94] py-[7px] pl-3 pr-2 shadow-tabbar backdrop-blur-xl"
         >
-          <Send size={18} />
-        </button>
-      </form>
-    </div>
+          <input
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            placeholder="Xabar yozing…"
+            className="min-w-0 flex-1 bg-transparent text-[10.5px] font-medium text-ink outline-none placeholder:text-ink-faint"
+          />
+          <button
+            type="submit"
+            disabled={!draft.trim() || sending}
+            aria-label="Yuborish"
+            className="grid h-[30px] w-[30px] flex-none place-items-center rounded-btn bg-carrot-grad text-[#2A1206] shadow-glow disabled:opacity-40"
+          >
+            <Send size={14} strokeWidth={2.4} />
+          </button>
+        </form>
+      </div>
+    </PageShell>
   );
 }

@@ -3,21 +3,6 @@
   <head>
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/logo.svg" />
-    <!-- Apply the saved (or system) theme before first paint so night mode
-         never flashes light. Mirrors utils/theme.js. -->
-    <script>
-      (function () {
-        try {
-          var t = localStorage.getItem("crm_theme");
-          if (t !== "dark" && t !== "light") {
-            t = window.matchMedia("(prefers-color-scheme: dark)").matches
-              ? "dark"
-              : "light";
-          }
-          if (t === "dark") document.documentElement.classList.add("dark");
-        } catch (e) {}
-      })();
-    </script>
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
     <meta
       name="viewport"
@@ -26,10 +11,13 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link
-      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700;12..96,800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
       rel="stylesheet"
     />
-    <title>Ota-ona portali</title>
+    <!-- Night-only app: tell the browser so form controls and scrollbars match. -->
+    <meta name="color-scheme" content="dark" />
+    <meta name="theme-color" content="#181310" />
+    <title>Farzandim</title>
   </head>
   <body>
     <div id="root"></div>

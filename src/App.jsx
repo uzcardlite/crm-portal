@@ -19,6 +19,9 @@ import PortalMenu from "./pages/PortalMenu";
 import PortalTurnstile from "./pages/PortalTurnstile";
 import PortalBooking from "./pages/PortalBooking";
 import PortalNews from "./pages/PortalNews";
+import PortalNotifications from "./pages/PortalNotifications";
+import PortalAbout from "./pages/PortalAbout";
+import PortalStars from "./pages/PortalStars";
 import { useNativeBackButton } from "./hooks/useNativeBackButton";
 import { setupNativeStatusBar } from "./utils/nativeStatusBar";
 
@@ -54,6 +57,9 @@ export default function App() {
             <Route path="/turnstile" element={<PortalTurnstile />} />
             <Route path="/booking" element={<PortalBooking />} />
             <Route path="/news" element={<PortalNews />} />
+            <Route path="/notifications" element={<PortalNotifications />} />
+            <Route path="/about" element={<PortalAbout />} />
+            <Route path="/stars" element={<PortalStars />} />
             <Route path="/profile" element={<PortalProfile />} />
           </Route>
           {/* Unknown path stays inside the portal instead of a 404. */}

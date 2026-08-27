@@ -1,206 +1,222 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { MessageCircle, Pencil, Users } from "lucide-react";
-import Avatar from "../components/ui/Avatar";
-import Button from "../components/ui/Button";
+import { useCallback, useMemo, useState } from "react";
+import { Link } from "react-router-dom";
+import { MessageCircle, Megaphone, Plus, Search, X } from "lucide-react";
+import PageShell from "../components/layout/PageShell";
+import PageTitle from "../components/ui/PageTitle";
 import Card from "../components/ui/Card";
 import EmptyState from "../components/ui/EmptyState";
-import Modal from "../components/ui/Modal";
 import Skeleton from "../components/ui/Skeleton";
-import Spinner from "../components/ui/Spinner";
-import { toast } from "../components/ui/Toast";
+import SectionHeader from "../components/ui/SectionHeader";
+import Sheet from "../components/ui/Sheet";
+import ThreadRow from "../components/chat/ThreadRow";
 import PortalErrorState from "../components/portal/PortalErrorState";
-import PortalPageHeader from "../components/portal/PortalPageHeader";
-import { createPortalChatThread, getPortalChatTeachers, getPortalChatThreads } from "../api/portal";
+import { toast } from "../components/ui/Toast";
+import {
+  createPortalChatThread,
+  getPortalAnnouncements,
+  getPortalChatTeachers,
+  getPortalChatThreads,
+} from "../api/portal";
 import { usePortalAuth } from "../context/PortalAuthContext";
 import { usePortalResource } from "../hooks/usePortalResource";
 import { getErrorMessage } from "../utils/apiError";
-import { formatDate, formatTime } from "../utils/format";
+import { cn } from "../utils/cn";
+import { formatDate } from "../utils/format";
 
-// Same-day threads show a time; older ones show the date.
-function threadStamp(value) {
-  if (!value) return "";
-  const isToday = String(value).slice(0, 10) === new Date().toISOString().slice(0, 10);
-  return isToday ? formatTime(value) : formatDate(value);
-}
+const FILTERS = [
+  { key: "all", label: "Barchasi" },
+  { key: "teachers", label: "Ustozlar" },
+  { key: "centre", label: "Markaz" },
+];
 
+// Teachers the parent writes to, and the centre's own announcements pinned
+// above them — a schedule change should never be buried between two chats.
 export default function PortalChat() {
-  const navigate = useNavigate();
-  const { activeStudentId, activeStudent } = usePortalAuth();
-
+  const { activeStudentId } = usePortalAuth();
   const enabled = Boolean(activeStudentId);
-  const loadThreads = useCallback(() => getPortalChatThreads(activeStudentId), [activeStudentId]);
-  const chat = usePortalResource(loadThreads, enabled);
 
-  const threads = useMemo(() => chat.data ?? [], [chat.data]);
-
-  // Teacher-picker state for the "Ustozga yozish" flow.
-  const [pickerOpen, setPickerOpen] = useState(false);
-  const [teachers, setTeachers] = useState([]);
-  const [teachersLoading, setTeachersLoading] = useState(false);
-  const [teachersError, setTeachersError] = useState(false);
-  // teacher_id currently being opened — disables the row and shows a spinner.
+  const [filter, setFilter] = useState("all");
+  const [query, setQuery] = useState("");
+  const [picker, setPicker] = useState(false);
   const [openingId, setOpeningId] = useState(null);
 
-  const loadTeachers = useCallback(() => {
-    if (!activeStudentId) return;
-    setTeachersLoading(true);
-    setTeachersError(false);
-    getPortalChatTeachers(activeStudentId)
-      .then((rows) => setTeachers(Array.isArray(rows) ? rows : []))
-      .catch(() => setTeachersError(true))
-      .finally(() => setTeachersLoading(false));
-  }, [activeStudentId]);
+  const loadThreads = useCallback(() => getPortalChatThreads(activeStudentId), [activeStudentId]);
+  const loadTeachers = useCallback(() => getPortalChatTeachers(activeStudentId), [activeStudentId]);
+  const loadAnnouncements = useCallback(() => getPortalAnnouncements(), []);
 
-  const openPicker = useCallback(() => {
-    setPickerOpen(true);
-    loadTeachers();
-  }, [loadTeachers]);
+  const threads = usePortalResource(loadThreads, enabled);
+  const teachers = usePortalResource(loadTeachers, enabled);
+  const announcements = usePortalResource(loadAnnouncements, enabled);
 
-  // Re-fetch teachers if the child is switched while the picker is closed.
-  useEffect(() => {
-    if (!pickerOpen) {
-      setTeachers([]);
-      setTeachersError(false);
-    }
-  }, [activeStudentId, pickerOpen]);
+  // The thread row does not carry the teacher's name yet, so it is matched by
+  // group; when the API starts sending it, this falls away.
+  const teacherByGroup = useMemo(() => {
+    const map = {};
+    (teachers.data ?? []).forEach((teacher) => {
+      map[teacher.group_name] = teacher.teacher_name;
+    });
+    return map;
+  }, [teachers.data]);
 
-  const startThread = useCallback(
-    (teacher) => {
-      if (openingId) return;
-      setOpeningId(teacher.teacher_id);
-      createPortalChatThread(activeStudentId, teacher.teacher_id)
-        .then((thread) => {
-          setPickerOpen(false);
-          navigate(`/chat/${thread.id}`);
-        })
-        .catch((requestError) => {
-          toast.error(getErrorMessage(requestError));
-        })
-        .finally(() => setOpeningId(null));
-    },
-    [activeStudentId, navigate, openingId],
-  );
+  const rows = useMemo(() => {
+    const all = threads.data ?? [];
+    const text = query.trim().toLowerCase();
+    if (!text) return all;
+    return all.filter((thread) =>
+      [thread.group_name, teacherByGroup[thread.group_name], thread.last_message_body]
+        .filter(Boolean)
+        .some((value) => value.toLowerCase().includes(text)),
+    );
+  }, [threads.data, query, teacherByGroup]);
+
+  const latestAnnouncement = (announcements.data ?? [])[0];
+  const started = new Set((threads.data ?? []).map((thread) => thread.group_name));
+  const canStart = (teachers.data ?? []).filter((teacher) => !started.has(teacher.group_name));
+
+  function openWith(teacher) {
+    setOpeningId(teacher.teacher_id);
+    createPortalChatThread(activeStudentId, teacher.teacher_id)
+      .then(() => {
+        setPicker(false);
+        threads.reload?.();
+      })
+      .catch((error) => toast.error(getErrorMessage(error, "Suhbatni ochib bo'lmadi")))
+      .finally(() => setOpeningId(null));
+  }
 
   return (
-    <>
-      <PortalPageHeader title="Chat" subtitle={activeStudent?.full_name}>
-        {enabled && threads.length > 0 && (
-          <Button size="sm" onClick={openPicker} className="flex-shrink-0">
-            <Pencil size={16} />
-            Ustozga yozish
-          </Button>
-        )}
-      </PortalPageHeader>
+    <PageShell>
+      <PageTitle
+        title="Chatlar"
+        subtitle={
+          (threads.data ?? []).length > 0
+            ? `${(threads.data ?? []).length} ta suhbat`
+            : null
+        }
+      />
 
-      {chat.loading ? (
-        <Card padding="p-4">
-          {Array.from({ length: 4 }, (_, index) => (
-            <Skeleton key={index} className="mt-2 h-14" />
-          ))}
-        </Card>
-      ) : chat.error ? (
-        <PortalErrorState onRetry={chat.reload} />
-      ) : threads.length === 0 ? (
-        <EmptyState
-          size="md"
-          icon={MessageCircle}
-          title="Suhbatlar yo'q"
-          description="Ustozga yozib, birinchi suhbatni boshlang."
-          action={
-            <Button size="sm" onClick={openPicker} disabled={!enabled}>
-              <Pencil size={16} />
-              Ustozga yozish
-            </Button>
-          }
-        />
-      ) : (
-        <Card padding="p-2">
-          {threads.map((thread) => (
-            <Link
-              key={thread.id}
-              to={`/chat/${thread.id}`}
-              className="flex items-center gap-3 rounded-btn px-2 py-3 transition-colors active:bg-surface-sunken"
-            >
-              <Avatar
-                size="md"
-                photoUrl={thread.photo_url}
-                name={thread.student_full_name}
-              />
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center justify-between gap-2">
-                  <p className="truncate text-sm font-medium text-fg">
-                    {thread.group_name || thread.student_full_name}
-                  </p>
-                  <span className="flex-shrink-0 text-xs text-fg-faint">
-                    {threadStamp(thread.last_message_at)}
-                  </span>
-                </div>
-                <div className="mt-0.5 flex items-center justify-between gap-2">
-                  <p className="truncate text-xs text-fg-muted">
-                    {thread.last_message_body || "Xabar yo'q"}
-                  </p>
-                  {thread.unread_count > 0 && (
-                    <span className="flex h-5 min-w-5 flex-shrink-0 items-center justify-center rounded-full bg-accent px-1.5 text-xs font-semibold text-accent-dark">
-                      {thread.unread_count}
-                    </span>
-                  )}
-                </div>
-              </div>
-            </Link>
-          ))}
-        </Card>
-      )}
-
-      <Modal open={pickerOpen} onClose={() => setPickerOpen(false)} title="Ustozga yozish">
-        {teachersLoading ? (
-          <div className="flex flex-col gap-2">
-            {Array.from({ length: 3 }, (_, index) => (
-              <Skeleton key={index} className="h-14" />
-            ))}
-          </div>
-        ) : teachersError ? (
-          <div className="flex flex-col items-center gap-3 py-6 text-center">
-            <p className="text-sm text-fg-muted">Ustozlarni yuklab bo'lmadi.</p>
-            <Button size="sm" variant="secondary" onClick={loadTeachers}>
-              Qayta urinish
-            </Button>
-          </div>
-        ) : teachers.length === 0 ? (
-          <EmptyState
-            size="sm"
-            icon={Users}
-            title="Guruh yoki ustoz topilmadi"
-            description="O'quvchi aktiv guruhga biriktirilgach, ustozlar shu yerda ko'rinadi."
+      <div className="flex flex-col gap-[11px] px-4 pb-[108px] pt-3.5">
+        <label className="flex items-center gap-2 rounded-[13px] border border-line bg-surface px-[11px] py-[9px] text-ink-faint">
+          <Search size={12} strokeWidth={2.3} />
+          <input
+            value={query}
+            onChange={(event) => setQuery(event.target.value)}
+            placeholder="Ustoz yoki xabar qidirish"
+            className="w-full bg-transparent text-[11px] font-semibold text-ink outline-none placeholder:text-ink-faint"
           />
-        ) : (
-          <div className="flex flex-col gap-1">
-            {teachers.map((teacher) => {
-              const opening = openingId === teacher.teacher_id;
-              return (
-                <button
-                  key={`${teacher.teacher_id}-${teacher.group_id}`}
-                  type="button"
-                  onClick={() => startThread(teacher)}
-                  disabled={Boolean(openingId)}
-                  className="flex items-center gap-3 rounded-btn px-2 py-3 text-left transition-colors active:bg-surface-sunken disabled:opacity-60"
-                >
-                  <Avatar size="md" name={teacher.teacher_name} />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-fg">
-                      {teacher.teacher_name}
-                    </p>
-                    {teacher.group_name && (
-                      <p className="truncate text-xs text-fg-muted">{teacher.group_name}</p>
-                    )}
-                  </div>
-                  {opening && <Spinner size={18} className="flex-shrink-0" />}
-                </button>
-              );
-            })}
-          </div>
+          {query && (
+            <button type="button" onClick={() => setQuery("")} aria-label="Tozalash">
+              <X size={12} strokeWidth={2.4} />
+            </button>
+          )}
+        </label>
+
+        <div className="flex gap-1.5">
+          {FILTERS.map((item) => (
+            <button
+              key={item.key}
+              type="button"
+              onClick={() => setFilter(item.key)}
+              className={cn(
+                "flex-1 rounded-[9px] border px-1 py-1.5 text-[9.5px] font-bold transition-colors",
+                filter === item.key
+                  ? "border-carrot/30 bg-carrot/[.14] text-carrot-bright"
+                  : "border-line bg-surface text-ink-faint",
+              )}
+            >
+              {item.label}
+            </button>
+          ))}
+        </div>
+
+        {filter !== "teachers" && latestAnnouncement && (
+          <Link
+            to="/notifications"
+            className="relative flex items-center gap-2.5 overflow-hidden rounded-[15px] border border-carrot/[.28] bg-[linear-gradient(140deg,rgba(210,113,47,.22),rgba(210,113,47,.06))] px-3 py-[11px]"
+          >
+            <span
+              aria-hidden="true"
+              className="absolute -right-10 -top-11 h-[110px] w-[110px] rounded-full bg-[radial-gradient(circle,rgba(236,138,69,.38),transparent_70%)]"
+            />
+            <span className="relative grid h-[34px] w-[34px] flex-none place-items-center rounded-[12px] bg-carrot/[.22] text-carrot-bright">
+              <Megaphone size={15} strokeWidth={2.2} />
+            </span>
+            <span className="relative min-w-0 flex-1">
+              <b className="block text-[11px] font-extrabold text-ink">Markaz e'lonlari</b>
+              <span className="mt-0.5 block truncate text-[9.5px] font-semibold text-ink-soft">
+                {latestAnnouncement.title}
+              </span>
+            </span>
+            <span className="relative flex-none text-[8.5px] font-bold text-ink-faint">
+              {formatDate(latestAnnouncement.created_at)}
+            </span>
+          </Link>
         )}
-      </Modal>
-    </>
+
+        {filter !== "centre" && (
+          <>
+            <SectionHeader
+              title="Ustozlar"
+              aside={
+                canStart.length > 0 ? (
+                  <button type="button" onClick={() => setPicker(true)} className="flex items-center gap-1">
+                    <Plus size={11} strokeWidth={2.6} /> Yangi
+                  </button>
+                ) : null
+              }
+            />
+
+            {threads.loading ? (
+              <div className="flex flex-col gap-[9px]">
+                {[0, 1, 2].map((index) => (
+                  <Skeleton key={index} className="h-[62px] rounded-[15px]" />
+                ))}
+              </div>
+            ) : threads.error ? (
+              <PortalErrorState size="md" title="Suhbatlarni yuklab bo'lmadi" onRetry={threads.reload} />
+            ) : rows.length === 0 ? (
+              <Card>
+                <EmptyState
+                  icon={MessageCircle}
+                  text={query ? "Hech narsa topilmadi" : "Ustoz bilan yozishmani boshlang"}
+                />
+              </Card>
+            ) : (
+              <div className="flex flex-col gap-[9px]">
+                {rows.map((thread) => (
+                  <ThreadRow
+                    key={thread.id}
+                    thread={thread}
+                    teacherName={teacherByGroup[thread.group_name]}
+                  />
+                ))}
+              </div>
+            )}
+          </>
+        )}
+      </div>
+
+      <Sheet open={picker} onClose={() => setPicker(false)}>
+        <SectionHeader title="Kimga yozmoqchisiz" />
+        <div className="mt-2.5 flex flex-col gap-[7px]">
+          {canStart.map((teacher) => (
+            <button
+              key={teacher.teacher_id}
+              type="button"
+              disabled={openingId === teacher.teacher_id}
+              onClick={() => openWith(teacher)}
+              className="flex items-center gap-2.5 rounded-[13px] border border-line bg-black/[.24] px-[11px] py-2.5 text-left disabled:opacity-50"
+            >
+              <span className="min-w-0 flex-1">
+                <b className="block truncate text-[11px] font-bold text-ink">{teacher.teacher_name}</b>
+                <span className="mt-px block truncate text-[8.5px] font-semibold text-ink-faint">
+                  {teacher.group_name}
+                </span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </Sheet>
+    </PageShell>
   );
 }

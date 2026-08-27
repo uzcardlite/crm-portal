@@ -83,6 +83,30 @@ export function getPortalBehaviour(studentId) {
     .then((res) => res.data);
 }
 
+export function getPortalReactions(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/reactions`)
+    .then((res) => res.data);
+}
+
+export function getPortalStars(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/stars`)
+    .then((res) => res.data);
+}
+
+export function getPortalFriends(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/friends`)
+    .then((res) => res.data);
+}
+
+export function getPortalRanking(studentId) {
+  return portalClient
+    .get(`/api/v1/portal/students/${studentId}/ranking`)
+    .then((res) => res.data);
+}
+
 // Read-only published announcements for this child's center, newest first.
 // Each item: { id, title, body, published_at, created_at }.
 export function getPortalNews(studentId) {
@@ -140,6 +164,14 @@ export function sendPortalChatMessage(threadId, body) {
 export function markPortalChatRead(threadId) {
   return portalClient
     .post(`/api/v1/portal/chat/threads/${threadId}/read`)
+    .then((res) => res.data);
+}
+
+// A parent flagging their child will miss today's lesson, attributed to
+// whichever group this thread's teacher shares with the child.
+export function createPortalAbsenceNotice(threadId, reason) {
+  return portalClient
+    .post(`/api/v1/portal/chat/threads/${threadId}/absence-notice`, { reason })
     .then((res) => res.data);
 }
 
