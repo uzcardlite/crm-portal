@@ -41,16 +41,16 @@ export default function ChildSwitcher() {
         onClick={() => setOpen((value) => !value)}
         aria-haspopup={many ? "listbox" : undefined}
         aria-expanded={many ? open : undefined}
-        className="flex items-center gap-[7px] rounded-full border border-line bg-surface py-1 pl-[5px] pr-[10px] disabled:cursor-default"
+        className="flex items-center gap-2 rounded-full border border-line bg-surface py-1.5 pl-1.5 pr-3 disabled:cursor-default"
       >
         <Avatar src={activeStudent.photo_url} size="xs" />
-        <span className="text-[11.5px] font-bold text-ink">{firstName}</span>
+        <span className="text-[13px] font-bold text-ink">{firstName}</span>
         {many && (
           <>
-            <span className="rounded-full bg-carrot/[.16] px-[5px] py-px text-[9px] font-bold text-carrot-bright">
+            <span className="rounded-full bg-carrot/[.16] px-1.5 py-px text-[10px] font-bold text-carrot-bright">
               {students.length}
             </span>
-            <ChevronDown size={11} strokeWidth={2.6} className="text-ink-faint" />
+            <ChevronDown size={14} strokeWidth={2.6} className="text-ink-faint" />
           </>
         )}
       </button>
@@ -58,7 +58,7 @@ export default function ChildSwitcher() {
       {open && many && (
         <ul
           role="listbox"
-          className="absolute left-1/2 top-[calc(100%+8px)] z-50 w-[190px] -translate-x-1/2 animate-fade-in overflow-hidden rounded-card border border-white/10 bg-surface-2 p-1 shadow-drawer"
+          className="absolute left-1/2 top-[calc(100%+8px)] z-50 w-[220px] -translate-x-1/2 animate-fade-in overflow-hidden rounded-card border border-white/10 bg-surface-2 p-1.5 shadow-drawer"
         >
           {students.map((student) => {
             const active = String(student.id) === activeStudentId;
@@ -73,15 +73,15 @@ export default function ChildSwitcher() {
                     setOpen(false);
                   }}
                   className={cn(
-                    "flex w-full items-center gap-[9px] rounded-[12px] px-2 py-2 text-left transition-colors",
+                    "flex w-full items-center gap-2.5 rounded-[12px] px-2.5 py-2.5 text-left transition-colors",
                     active ? "bg-carrot/[.14]" : "hover:bg-white/[.04]",
                   )}
                 >
                   <Avatar src={student.photo_url} size="sm" />
-                  <span className={cn("flex-1 truncate text-[11px] font-bold", active ? "text-carrot-bright" : "text-ink-soft")}>
+                  <span className={cn("flex-1 truncate text-[13px] font-bold", active ? "text-carrot-bright" : "text-ink-soft")}>
                     {student.full_name}
                   </span>
-                  {active && <Check size={13} strokeWidth={2.6} className="flex-none text-carrot-bright" />}
+                  {active && <Check size={16} strokeWidth={2.6} className="flex-none text-carrot-bright" />}
                 </button>
               </li>
             );

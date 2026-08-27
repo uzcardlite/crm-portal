@@ -12,9 +12,9 @@ export default function TopBar({ onMenu, unreadCount = 0 }) {
         type="button"
         onClick={onMenu}
         aria-label="Menyu"
-        className="grid h-[31px] w-[31px] flex-none place-items-center rounded-btn border border-line bg-surface text-ink-soft transition-colors hover:text-ink"
+        className="grid h-11 w-11 flex-none place-items-center rounded-btn border border-line bg-surface text-ink-soft transition-colors hover:text-ink"
       >
-        <Menu size={14} strokeWidth={2.2} />
+        <Menu size={19} strokeWidth={2.2} />
       </button>
 
       <ChildSwitcher />
@@ -27,13 +27,13 @@ export default function TopBar({ onMenu, unreadCount = 0 }) {
             : "Bildirishnomalar"
         }
         className={cn(
-          "relative grid h-[31px] w-[31px] flex-none place-items-center rounded-btn border border-line bg-surface transition-colors",
+          "relative grid h-11 w-11 flex-none place-items-center rounded-btn border border-line bg-surface transition-colors",
           unreadCount > 0 ? "text-carrot-bright shadow-glow" : "text-ink-soft hover:text-ink",
         )}
       >
-        <Bell size={14} strokeWidth={2.2} />
+        <Bell size={19} strokeWidth={2.2} />
         {unreadCount > 0 && (
-          <span className="absolute -right-1.5 -top-1.5 grid h-[17px] min-w-[17px] place-items-center rounded-full border-2 border-bg bg-carrot-grad px-1 text-[9.5px] font-extrabold text-[#2A1206] shadow-glow">
+          <span className="absolute -right-1.5 -top-1.5 grid h-[21px] min-w-[21px] place-items-center rounded-full border-2 border-bg bg-carrot-grad px-1 text-[11px] font-extrabold text-[#2A1206] shadow-glow">
             {unreadCount > 9 ? "9+" : unreadCount}
           </span>
         )}

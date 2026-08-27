@@ -13,7 +13,7 @@ const TABS = [
 
 export default function TabBar({ unreadChats = 0 }) {
   return (
-    <nav className="fixed inset-x-[13px] bottom-[13px] z-30 mx-auto flex max-w-lg items-center justify-around rounded-[22px] border border-white/[.09] bg-surface/[.92] px-1.5 py-[9px] shadow-tabbar backdrop-blur-xl">
+    <nav className="fixed inset-x-3 bottom-3 z-30 mx-auto flex max-w-lg items-center justify-around rounded-[26px] border border-white/[.09] bg-surface/[.92] px-2 py-[10px] shadow-tabbar backdrop-blur-xl">
       {TABS.map(({ to, label, icon: Icon, end, badge }) => (
         <NavLink
           key={to}
@@ -21,7 +21,7 @@ export default function TabBar({ unreadChats = 0 }) {
           end={end}
           className={({ isActive }) =>
             cn(
-              "relative flex flex-col items-center gap-[3px] transition-colors",
+              "relative flex flex-col items-center gap-1 transition-colors",
               isActive ? "text-carrot-bright" : "text-ink-faint",
             )
           }
@@ -31,18 +31,18 @@ export default function TabBar({ unreadChats = 0 }) {
               {badge && unreadChats > 0 && (
                 <span
                   aria-hidden="true"
-                  className="absolute -top-px right-[3px] h-1.5 w-1.5 rounded-full bg-rose shadow-glow-rose"
+                  className="absolute top-0 right-1.5 h-2 w-2 rounded-full bg-rose shadow-glow-rose"
                 />
               )}
               <span
                 className={cn(
-                  "grid h-[30px] w-[30px] place-items-center rounded-[12px] transition-colors",
+                  "grid h-11 w-11 place-items-center rounded-2xl transition-colors",
                   isActive && "bg-carrot-grad text-[#2A1206] shadow-glow",
                 )}
               >
-                <Icon size={15} strokeWidth={isActive ? 2.3 : 2.1} />
+                <Icon size={21} strokeWidth={isActive ? 2.3 : 2.1} />
               </span>
-              <span className="text-[8.5px] font-bold">{label}</span>
+              <span className="text-[10.5px] font-bold">{label}</span>
             </>
           )}
         </NavLink>
