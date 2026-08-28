@@ -55,7 +55,7 @@ export default function PortalStars() {
             </span>
             {!loading && stars.data?.rank && (
               <span className="relative mt-2.5 inline-flex items-center gap-1.5 rounded-full border border-line bg-surface-2 px-3 py-[5px] text-[9.5px] font-bold text-ink-soft">
-                Sinfda <b className="text-ink">#{stars.data.rank}</b>
+                Guruhda <b className="text-ink">#{stars.data.rank}</b>
                 {stars.data.group_size ? ` / ${stars.data.group_size} o'quvchidan` : ""}
               </span>
             )}

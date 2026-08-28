@@ -86,7 +86,7 @@ export default function Hero({ student, stars, rank, payment, monthReactions, lo
       <div className="mt-3 flex flex-wrap items-center justify-center gap-2">
         {rank && (
           <span className="inline-flex items-center gap-1.5 rounded-full border border-line bg-surface px-3 py-[6px] text-[10.5px] font-bold text-ink-soft">
-            Sinfda <b className="text-ink">#{rank}</b>
+            Guruhda <b className="text-ink">#{rank}</b>
           </span>
         )}
         {payment && (
