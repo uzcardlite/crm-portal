@@ -4,6 +4,7 @@ import { PortalAuthProvider } from "./context/PortalAuthContext";
 import PortalProtectedRoute from "./components/portal/PortalProtectedRoute";
 import PortalLayout from "./components/portal/PortalLayout";
 import Toast from "./components/ui/Toast";
+import UpdateGate from "./components/UpdateGate";
 import PortalLogin from "./pages/PortalLogin";
 import PortalHome from "./pages/PortalHome";
 import PortalAttendance from "./pages/PortalAttendance";
@@ -34,6 +35,7 @@ export default function App() {
   return (
     <PortalAuthProvider>
       <BrowserRouter>
+        <UpdateGate />
         <Toast />
         <Routes>
           <Route path="/login" element={<PortalLogin />} />
