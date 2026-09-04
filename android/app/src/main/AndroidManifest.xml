@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <!-- A dependency injects DUMP at merge time. It is a signature-level
+         permission this app never uses, and shipping it invites questions
+         during Play review, so strip it from the merged manifest. -->
+    <uses-permission android:name="android.permission.DUMP" tools:node="remove" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"

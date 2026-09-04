@@ -6,7 +6,6 @@ import {
   CalendarDays,
   ChevronRight,
   CreditCard,
-  Download,
   LogOut,
   Pencil,
   Star,
@@ -32,7 +31,6 @@ const GROUPS = [
     items: [
       { to: "/notifications", icon: Bell, title: "Bildirishnomalar", note: "Qaysi xabarlar ko'rinsin" },
       { to: "/about", icon: Building2, title: "Markaz haqida", note: "Aloqa va ma'lumot" },
-      { href: "/farzandim.apk", icon: Download, title: "Ilovani yuklab olish", note: "Android uchun APK" },
     ],
   },
 ];
