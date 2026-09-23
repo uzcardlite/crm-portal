@@ -6,6 +6,7 @@ import {
   CalendarDays,
   ChevronRight,
   CreditCard,
+  Headset,
   LogOut,
   Pencil,
   Star,
@@ -13,6 +14,7 @@ import {
 import Avatar from "../ui/Avatar";
 import { usePortalAuth } from "../../context/PortalAuthContext";
 import { cn } from "../../utils/cn";
+import { SUPPORT_URL, openSupport } from "../../utils/support";
 
 // Everything the four tabs could not hold — and nothing more. Each entry is
 // something a parent actually goes looking for; the rest was folded into the
@@ -31,6 +33,7 @@ const GROUPS = [
     items: [
       { to: "/notifications", icon: Bell, title: "Bildirishnomalar", note: "Qaysi xabarlar ko'rinsin" },
       { to: "/about", icon: Building2, title: "Markaz haqida", note: "Aloqa va ma'lumot" },
+      { href: SUPPORT_URL, external: true, icon: Headset, title: "Texnik yordam", note: "Savol va takliflar · @nyordam" },
     ],
   },
 ];
@@ -123,7 +126,7 @@ export default function Drawer({ open, onClose }) {
               <p className="px-1 pb-2 pt-3.5 text-[10px] font-bold uppercase tracking-[.09em] text-ink-faint">
                 {group.label}
               </p>
-              {group.items.map(({ to, href, icon: Icon, title, note, soon }) => {
+              {group.items.map(({ to, href, external, icon: Icon, title, note, soon }) => {
                 const row = (
                   <>
                     <span className="grid h-10 w-10 flex-none place-items-center rounded-btn border border-line bg-black/[.28] text-ink-soft">
@@ -152,6 +155,22 @@ export default function Drawer({ open, onClose }) {
                     <div key={to || href} className="flex items-center gap-3 rounded-[13px] p-3 opacity-55">
                       {row}
                     </div>
+                  );
+                }
+
+                // Opens the support bot in Telegram (see utils/support.js).
+                if (href && external) {
+                  return (
+                    <a
+                      key={href}
+                      href={href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={openSupport}
+                      className="flex items-center gap-3 rounded-[13px] p-3 transition-colors hover:bg-white/[.04]"
+                    >
+                      {row}
+                    </a>
                   );
                 }
 
