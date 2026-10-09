@@ -46,10 +46,13 @@ Savollar: info@ncrm.uz
 |---|---|---|
 | Ikonka | 512×512 | `farzandim-assets/icon-512.png` ✅ |
 | Feature graphic | 1024×500 | `farzandim-assets/feature-graphic.png` ✅ |
-| Skrinshotlar | 2-8 ta, 16:9 yoki 9:16 | ⚠️ olinmagan |
+| Skrinshotlar | 5 ta, 1080×1920 (9:16) | `farzandim-assets/screenshots/` ✅ |
 
-Skrinshot uchun ekranlar: Bosh sahifa, Davomat, To'lovlar, Dars jadvali, Chat.
-**Haqiqiy o'quvchilar ismi ko'rinmasin** — demo ma'lumot bilan oling.
+Ekranlar: Bosh sahifa, Davomat, To'lovlar, Dars jadvali, Chat. Hammasi
+o'ylab topilgan demo markazdan ("Ziyo Nur o'quv markazi") olingan — haqiqiy
+o'quvchi ma'lumoti yo'q. Qayta olish: lokal bazada
+`crm-backend/scripts/seed_demo_tenant.py`, so'ng xom skrinshotni
+`scripts/store_screenshots.py` bilan ramkaga joylash.
 
 ---
 
@@ -93,6 +96,13 @@ Natija: **3+ / Everyone**.
 ## Qolgan ishlar
 
 1. **Skrinshotlar** — brauzerda `portal.ncrm.uz` ni telefon rejimida ochib olish
-2. **Учетные данные** — Google tekshiruvchisi uchun demo hisob kerak
-   (login Telegram bot kodi bilan ishlaydi, tekshiruvchi unga kira olmaydi)
+2. **Учетные данные** — tekshiruvchi uchun demo hisob. Backend tayyor:
+   `PORTAL_REVIEW_PHONE` raqami Telegram kodi o'rniga qat'iy
+   `PORTAL_REVIEW_CODE` bilan kiradi. Qolgan qadamlar:
+   - production'da demo markaz: `python scripts/seed_demo_tenant.py --allow-remote`
+     (telefon `+998990000001`, hammasi o'ylab topilgan ma'lumot);
+   - Railway'da `PORTAL_REVIEW_PHONE=+998990000001` va `PORTAL_REVIEW_CODE`
+     (6 xonali, faqat tekshiruv davrida) o'rnatish;
+   - Play Console → App access: "Telefon: +998990000001 → Kodni olish →
+     kod: <PORTAL_REVIEW_CODE>".
 3. **Closed testing** — 12 ta tester, 14 kun (Individual akkaunt talabi)

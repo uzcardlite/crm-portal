@@ -29,10 +29,18 @@ export function formatTime(value) {
   return new Date(value).toLocaleTimeString("uz-UZ", { hour: "2-digit", minute: "2-digit" });
 }
 
-// A bare "HH:MM:SS" clock string (backend `time` field) -> "HH:MM".
+// "HH:MM" from either a bare "HH:MM:SS" clock string (backend `time` field)
+// or a full ISO datetime (`created_at`, `event_time`). A datetime is shown in
+// the device's local time — slicing it would print "2026-" instead of a clock.
 export function formatClock(value) {
   if (!value) return EMPTY_VALUE;
-  return String(value).slice(0, 5);
+  const text = String(value);
+  if (/^\d{4}-\d{2}-\d{2}T/.test(text)) {
+    const date = new Date(text);
+    if (Number.isNaN(date.getTime())) return EMPTY_VALUE;
+    return `${String(date.getHours()).padStart(2, "0")}:${String(date.getMinutes()).padStart(2, "0")}`;
+  }
+  return text.slice(0, 5);
 }
 
 // Group digits in threes with a dot, locale-independent: 1250000 -> "1.250.000".
