@@ -76,4 +76,17 @@ portalClient.interceptors.response.use(
   },
 );
 
+// Best-effort server-side logout (revokes the refresh token). Uses plain axios,
+// not portalClient, so a 401 here never triggers the refresh interceptor. Errors
+// (404 before the backend ships it, 401 on an already-expired token) are swallowed.
+export function revokePortalSession(accessToken) {
+  if (!accessToken) return;
+  axios
+    .post(`${baseURL}/api/v1/portal/auth/logout`, null, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+      timeout: 5000,
+    })
+    .catch(() => {});
+}
+
 export default portalClient;

@@ -6,9 +6,11 @@ import {
   useState,
 } from "react";
 import { listPortalStudents, loginWithTelegramInitData } from "../api/portal";
+import { revokePortalSession } from "../api/portalClient";
 import {
   clearPortalSession,
   getActiveStudentId,
+  getPortalAccessToken,
   getPortalPhone,
   hasPortalSession,
   setActiveStudentId as persistActiveStudentId,
@@ -118,8 +120,9 @@ export function PortalAuthProvider({ children }) {
     persistActiveStudentId(next);
   }, []);
 
-  // Clears the portal keys only.
   const logout = useCallback(() => {
+    // Fire-and-forget: capture the token before clearing, never block the UI.
+    revokePortalSession(getPortalAccessToken());
     clearPortalSession();
     setAuthenticated(false);
     setStudents([]);
